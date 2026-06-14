@@ -1,0 +1,20 @@
+$kind: http-request
+name: PUT Update Patient
+method: PUT
+url: '{{base_url}}/patients/{{patient_id}}'
+order: 4000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Sara Mohamed",
+      "email": "sara@example.com",
+      "age": 26,
+      "gender": "female",
+      "phone": "01098765432"
+    }

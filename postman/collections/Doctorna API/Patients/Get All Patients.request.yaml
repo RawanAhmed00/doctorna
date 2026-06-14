@@ -1,0 +1,13 @@
+$kind: http-request
+name: GET All Patients
+method: GET
+url: '{{base_url}}/patients'
+order: 1000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+queryParams:
+  - key: page
+    value: '1'
+  - key: limit
+    value: '10'

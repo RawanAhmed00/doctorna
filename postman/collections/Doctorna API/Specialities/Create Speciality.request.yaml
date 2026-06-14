@@ -1,0 +1,17 @@
+$kind: http-request
+name: POST Create Speciality
+method: POST
+url: '{{base_url}}/specialities'
+order: 3000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Cardiology",
+      "description": "Heart and cardiovascular system"
+    }

@@ -1,0 +1,8 @@
+$kind: http-request
+name: GET All Doctors
+method: GET
+url: '{{base_url}}/doctors'
+order: 1000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'

@@ -1,0 +1,8 @@
+$kind: http-request
+name: GET All Sub Services
+method: GET
+url: '{{base_url}}/sub-services'
+order: 1000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'

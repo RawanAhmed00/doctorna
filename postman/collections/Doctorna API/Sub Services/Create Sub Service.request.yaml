@@ -1,0 +1,18 @@
+$kind: http-request
+name: POST Create Sub Service
+method: POST
+url: '{{base_url}}/sub-services'
+order: 3000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Blood Test",
+      "fees": 150.00,
+      "description": "Complete blood count test"
+    }

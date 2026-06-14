@@ -1,0 +1,13 @@
+$kind: http-request
+name: GET All Appointments
+method: GET
+url: '{{base_url}}/appointments'
+order: 1000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+queryParams:
+  - key: status
+    value: pending
+  - key: date
+    value: '2025-01-01'

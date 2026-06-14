@@ -1,0 +1,8 @@
+$kind: http-request
+name: GET Appointment by ID
+method: GET
+url: '{{base_url}}/appointments/{{appointment_id}}'
+order: 2000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'

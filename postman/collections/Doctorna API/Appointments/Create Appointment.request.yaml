@@ -1,0 +1,19 @@
+$kind: http-request
+name: POST Create Appointment
+method: POST
+url: '{{base_url}}/appointments'
+order: 3000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "pending",
+      "date_time": "2025-06-15 10:00:00",
+      "user_id": 1,
+      "doc_id": 1
+    }
