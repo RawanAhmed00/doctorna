@@ -1,0 +1,19 @@
+# Composer Dependencies
+/vendor/
+
+# Environment Variables
+.env
+.env.backup
+.env.production
+.env.local
+
+# IDE & OS Files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs & Temporary Files
+*.log
+/cache/
+/tmp/
