@@ -1,0 +1,19 @@
+{
+    "name": "ahmdr/doctorna",
+    "autoload": {
+        "psr-4": {
+            "Ahmdr\\Doctorna\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "RawanAhmed00",
+            "email": "ahmdrwan577@gmail.com"
+        }
+    ],
+    "require": {
+        "firebase/php-jwt": "^7.1",
+        "predis/predis": "^3.5",
+        "phpmailer/phpmailer": "^7.1"
+    }
+}
