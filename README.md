@@ -111,3 +111,35 @@ Prefix all commit messages using standard conventional commits:
 
 **Q: Where are the `vendor/` files?**
 **A:** They are intentionally excluded from version control to keep the repository fast. Running `composer install` will download them locally.
+
+---
+
+## 📋 Sprint Tasks & Team Assignments
+
+To avoid merge conflicts, team members should focus exclusively on their assigned modules and controllers.
+
+**👩‍💻 Rawan**
+- **Authentication:** POST Login, POST Register
+- **Database:** Finalize Database Creation/Migrations
+- **Docs:** API Documentation
+
+**👨‍💻 Tayson**
+- **Authentication:** POST Forget Password, POST Reset Password, PHPMailer Integration
+- **Doctor Module (DoctorController):** GET by ID, GET All, POST, PUT, DELETE, PATCH Availability
+- **Features:** Redis Caching for Doctor Module
+
+**👨‍💻 Abdullah & Adham**
+- **Patients Module (PatientController / UserController):** GET by ID, GET All, POST, PUT, DELETE
+- **Features:** Soft Delete implementation (Abdullah), Global Pagination
+
+**👩‍💻 Maryam**
+- **Appointment Module (AppointmentController):** GET by ID, GET All, POST
+- **Features:** Filtration / Searching
+
+**👩‍💻 Nada**
+- **Sub Services Module (SubServiceController):** GET by ID, GET All, POST
+- **Features:** Redis Caching for Sub Services
+
+**👩‍💻 Tassneem**
+- **Speciality Module (SpecialityController):** GET by ID, GET All, POST, PUT
+- **Features:** Redis Caching for Specialities
