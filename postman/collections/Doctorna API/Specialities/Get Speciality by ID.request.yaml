@@ -1,8 +1,0 @@
-$kind: http-request
-name: GET Speciality by ID
-method: GET
-url: '{{base_url}}/specialities/{{speciality_id}}'
-order: 2000
-headers:
-  - key: Authorization
-    value: 'Bearer {{token}}'

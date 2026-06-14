@@ -1,8 +1,0 @@
-$kind: http-request
-name: DELETE Doctor
-method: DELETE
-url: '{{base_url}}/doctors/{{doctor_id}}'
-order: 5000
-headers:
-  - key: Authorization
-    value: 'Bearer {{token}}'
