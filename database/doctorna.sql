@@ -32,7 +32,8 @@ CREATE TABLE `appointments` (
   `status` enum('completed','cancelled','pending','confirmed') NOT NULL,
   `date_time` datetime NOT NULL,
   `user_id` int(12) NOT NULL,
-  `doc_id` int(12) NOT NULL
+  `doc_id` int(12) NOT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -100,7 +101,7 @@ INSERT INTO `appointments` (`id`, `status`, `date_time`, `user_id`, `doc_id`) VA
 CREATE TABLE `appointment_subservice` (
   `appointment_id` int(12) NOT NULL,
   `subservice_id` int(12) NOT NULL,
-  `prescription` varchar(50) NOT NULL
+  `prescription` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -171,12 +172,13 @@ INSERT INTO `appointment_subservice` (`appointment_id`, `subservice_id`, `prescr
 
 CREATE TABLE `doctors` (
   `id` int(12) NOT NULL,
-  `name` varchar(20) NOT NULL,
-  `email` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(150) NOT NULL,
   `rank` enum('intern','resident','specialist','senior specialist','consultant') NOT NULL,
   `gender` enum('male','female') NOT NULL,
-  `availability` enum('available','not available') NOT NULL,
-  `spec_id` int(12) NOT NULL
+  `is_available` tinyint(1) NOT NULL DEFAULT 1,
+  `spec_id` int(12) NOT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -184,56 +186,56 @@ CREATE TABLE `doctors` (
 --
 
 INSERT INTO `doctors` (`id`, `name`, `email`, `rank`, `gender`, `availability`, `spec_id`) VALUES
-(1, 'Dr. Tarek Hegazi', 'tarek@doctorna.com', 'consultant', 'male', 'available', 1),
-(2, 'Dr. Mona El-Assal', 'mona@doctorna.com', 'senior specialist', 'female', 'available', 2),
-(3, 'Dr. Amr Diab', 'amr.d@doctorna.com', 'specialist', 'male', 'available', 3),
-(4, 'Dr. Rania Youssef', 'rania.y@doctorna.com', 'resident', 'female', 'not available', 4),
-(5, 'Dr. Khaled El-Sawy', 'khaled.s@doctorna.co', 'consultant', 'male', 'available', 5),
-(6, 'Dr. Fatma Omar', 'fatma.o@doctorna.com', 'intern', 'female', 'available', 6),
-(7, 'Dr. Sherif Mounir', 'sherif.m@doctorna.co', 'senior specialist', 'male', 'available', 7),
-(8, 'Dr. Dina Fouad', 'dina.f@doctorna.com', 'specialist', 'female', 'available', 8),
-(9, 'Dr. Mahmoud Abdel', 'mahmoud.a@doctorna.c', 'consultant', 'male', 'not available', 9),
-(10, 'Dr. Aya Mansour', 'aya.m@doctorna.com', 'resident', 'female', 'available', 10),
-(11, 'Dr. Hany Ramzy', 'hany.r@doctorna.com', 'specialist', 'male', 'available', 11),
-(12, 'Dr. Mai Selim', 'mai.s@doctorna.com', 'intern', 'female', 'available', 12),
-(13, 'Dr. Ahmed Khaled', 'ahmed.k@example.com', 'consultant', 'male', 'available', 13),
-(14, 'Dr. Noha Soliman', 'noha.s@doctorna.com', 'senior specialist', 'female', 'available', 14),
-(15, 'Dr. Waleed Fawzy', 'waleed.f@doctorna.co', 'specialist', 'male', 'not available', 15),
-(16, 'Dr. Yasmine Sabri', 'yasmine.s@doctorna.c', 'resident', 'female', 'available', 16),
-(17, 'Dr. Mostafa Nour', 'mostafa.n@doctorna.c', 'consultant', 'male', 'available', 17),
-(18, 'Dr. Reem Ali', 'reem.a@doctorna.com', 'intern', 'female', 'available', 18),
-(19, 'Dr. Hazem Imam', 'hazem.i@doctorna.com', 'senior specialist', 'male', 'available', 19),
-(20, 'Dr. Laila Elwi', 'laila.e@doctorna.com', 'specialist', 'female', 'available', 20),
-(21, 'Dr. Karim Fahmy', 'karim.f@doctorna.com', 'consultant', 'male', 'available', 21),
-(22, 'Dr. Heba Magdy', 'heba.m@doctorna.com', 'resident', 'female', 'available', 22),
-(23, 'Dr. Sameh Hussein', 'sameh.h@doctorna.com', 'specialist', 'male', 'not available', 23),
-(24, 'Dr. Salma Ahmed', 'salma.a@doctorna.com', 'intern', 'female', 'available', 24),
-(25, 'Dr. Eslam El-Sayed', 'eslam.s@doctorna.com', 'senior specialist', 'male', 'available', 25),
-(26, 'Dr. Farida Seif', 'farida.s@doctorna.co', 'consultant', 'female', 'available', 26),
-(27, 'Dr. Ramy Sabry', 'ramy.s@doctorna.com', 'resident', 'male', 'available', 27),
-(28, 'Dr. Nadine Khan', 'nadine.k@doctorna.co', 'specialist', 'female', 'available', 28),
-(29, 'Dr. Maged El-Kedy', 'maged.k@doctorna.com', 'consultant', 'male', 'available', 29),
-(30, 'Dr. Habiba Shaker', 'habiba.s@doctorna.co', 'intern', 'female', 'not available', 30),
-(31, 'Dr. Hisham Abbas', 'hisham.a@doctorna.co', 'senior specialist', 'male', 'available', 31),
-(32, 'Dr. Malak Nour', 'malak.n@doctorna.com', 'specialist', 'female', 'available', 32),
-(33, 'Dr. Bassem Youssef', 'bassem.y@doctorna.co', 'consultant', 'male', 'available', 33),
-(34, 'Dr. Jana Amr', 'jana.a@doctorna.com', 'resident', 'female', 'available', 34),
-(35, 'Dr. Ziad Rahal', 'ziad.r@doctorna.com', 'specialist', 'male', 'available', 35),
-(36, 'Dr. Mariam Nour', 'mariam.n@doctorna.co', 'intern', 'female', 'available', 36),
-(37, 'Dr. Ashraf Zaki', 'ashraf.z@doctorna.co', 'consultant', 'male', 'not available', 37),
-(38, 'Dr. Shahd El-Sawy', 'shahd.s@doctorna.com', 'senior specialist', 'female', 'available', 38),
-(39, 'Dr. Belal Hamed', 'belal.h@doctorna.com', 'resident', 'male', 'available', 39),
-(40, 'Dr. Ghada Adel', 'ghada.a@doctorna.com', 'specialist', 'female', 'available', 40),
-(41, 'Dr. Ayman Nour', 'ayman.n@doctorna.com', 'consultant', 'male', 'available', 41),
-(42, 'Dr. Shaimaa Aly', 'shaimaa.a@doctorna.c', 'intern', 'female', 'available', 42),
-(43, 'Dr. Medhat Saleh', 'medhat.s@doctorna.co', 'senior specialist', 'male', 'available', 43),
-(44, 'Dr. Radwa Sherif', 'radwa.s@doctorna.com', 'specialist', 'female', 'available', 44),
-(45, 'Dr. Tamer Hosny', 'tamer.h@doctorna.com', 'consultant', 'male', 'not available', 45),
-(46, 'Dr. Ola Ghanem', 'ola.g@doctorna.com', 'resident', 'female', 'available', 46),
-(47, 'Dr. Wael Jassar', 'wael.j@doctorna.com', 'specialist', 'male', 'available', 47),
-(48, 'Dr. Hanan Turk', 'hanan.t@doctorna.com', 'intern', 'female', 'available', 48),
-(49, 'Dr. Sherif Ramzy', 'sherif.r@doctorna.co', 'senior specialist', 'male', 'available', 49),
-(50, 'Dr. Mirna Nour', 'mirna.n@doctorna.com', 'consultant', 'female', 'available', 50);
+(1, 'Dr. Tarek Hegazi', 'tarek@doctorna.com', 'consultant', 'male', '1', 1),
+(2, 'Dr. Mona El-Assal', 'mona@doctorna.com', 'senior specialist', 'female', '1', 2),
+(3, 'Dr. Amr Diab', 'amr.d@doctorna.com', 'specialist', 'male', '1', 3),
+(4, 'Dr. Rania Youssef', 'rania.y@doctorna.com', 'resident', 'female', '0', 4),
+(5, 'Dr. Khaled El-Sawy', 'khaled.s@doctorna.co', 'consultant', 'male', '1', 5),
+(6, 'Dr. Fatma Omar', 'fatma.o@doctorna.com', 'intern', 'female', '1', 6),
+(7, 'Dr. Sherif Mounir', 'sherif.m@doctorna.co', 'senior specialist', 'male', '1', 7),
+(8, 'Dr. Dina Fouad', 'dina.f@doctorna.com', 'specialist', 'female', '1', 8),
+(9, 'Dr. Mahmoud Abdel', 'mahmoud.a@doctorna.c', 'consultant', 'male', '0', 9),
+(10, 'Dr. Aya Mansour', 'aya.m@doctorna.com', 'resident', 'female', '1', 10),
+(11, 'Dr. Hany Ramzy', 'hany.r@doctorna.com', 'specialist', 'male', '1', 11),
+(12, 'Dr. Mai Selim', 'mai.s@doctorna.com', 'intern', 'female', '1', 12),
+(13, 'Dr. Ahmed Khaled', 'ahmed.k@example.com', 'consultant', 'male', '1', 13),
+(14, 'Dr. Noha Soliman', 'noha.s@doctorna.com', 'senior specialist', 'female', '1', 14),
+(15, 'Dr. Waleed Fawzy', 'waleed.f@doctorna.co', 'specialist', 'male', '0', 15),
+(16, 'Dr. Yasmine Sabri', 'yasmine.s@doctorna.c', 'resident', 'female', '1', 16),
+(17, 'Dr. Mostafa Nour', 'mostafa.n@doctorna.c', 'consultant', 'male', '1', 17),
+(18, 'Dr. Reem Ali', 'reem.a@doctorna.com', 'intern', 'female', '1', 18),
+(19, 'Dr. Hazem Imam', 'hazem.i@doctorna.com', 'senior specialist', 'male', '1', 19),
+(20, 'Dr. Laila Elwi', 'laila.e@doctorna.com', 'specialist', 'female', '1', 20),
+(21, 'Dr. Karim Fahmy', 'karim.f@doctorna.com', 'consultant', 'male', '1', 21),
+(22, 'Dr. Heba Magdy', 'heba.m@doctorna.com', 'resident', 'female', '1', 22),
+(23, 'Dr. Sameh Hussein', 'sameh.h@doctorna.com', 'specialist', 'male', '0', 23),
+(24, 'Dr. Salma Ahmed', 'salma.a@doctorna.com', 'intern', 'female', '1', 24),
+(25, 'Dr. Eslam El-Sayed', 'eslam.s@doctorna.com', 'senior specialist', 'male', '1', 25),
+(26, 'Dr. Farida Seif', 'farida.s@doctorna.co', 'consultant', 'female', '1', 26),
+(27, 'Dr. Ramy Sabry', 'ramy.s@doctorna.com', 'resident', 'male', '1', 27),
+(28, 'Dr. Nadine Khan', 'nadine.k@doctorna.co', 'specialist', 'female', '1', 28),
+(29, 'Dr. Maged El-Kedy', 'maged.k@doctorna.com', 'consultant', 'male', '1', 29),
+(30, 'Dr. Habiba Shaker', 'habiba.s@doctorna.co', 'intern', 'female', '0', 30),
+(31, 'Dr. Hisham Abbas', 'hisham.a@doctorna.co', 'senior specialist', 'male', '1', 31),
+(32, 'Dr. Malak Nour', 'malak.n@doctorna.com', 'specialist', 'female', '1', 32),
+(33, 'Dr. Bassem Youssef', 'bassem.y@doctorna.co', 'consultant', 'male', '1', 33),
+(34, 'Dr. Jana Amr', 'jana.a@doctorna.com', 'resident', 'female', '1', 34),
+(35, 'Dr. Ziad Rahal', 'ziad.r@doctorna.com', 'specialist', 'male', '1', 35),
+(36, 'Dr. Mariam Nour', 'mariam.n@doctorna.co', 'intern', 'female', '1', 36),
+(37, 'Dr. Ashraf Zaki', 'ashraf.z@doctorna.co', 'consultant', 'male', '0', 37),
+(38, 'Dr. Shahd El-Sawy', 'shahd.s@doctorna.com', 'senior specialist', 'female', '1', 38),
+(39, 'Dr. Belal Hamed', 'belal.h@doctorna.com', 'resident', 'male', '1', 39),
+(40, 'Dr. Ghada Adel', 'ghada.a@doctorna.com', 'specialist', 'female', '1', 40),
+(41, 'Dr. Ayman Nour', 'ayman.n@doctorna.com', 'consultant', 'male', '1', 41),
+(42, 'Dr. Shaimaa Aly', 'shaimaa.a@doctorna.c', 'intern', 'female', '1', 42),
+(43, 'Dr. Medhat Saleh', 'medhat.s@doctorna.co', 'senior specialist', 'male', '1', 43),
+(44, 'Dr. Radwa Sherif', 'radwa.s@doctorna.com', 'specialist', 'female', '1', 44),
+(45, 'Dr. Tamer Hosny', 'tamer.h@doctorna.com', 'consultant', 'male', '0', 45),
+(46, 'Dr. Ola Ghanem', 'ola.g@doctorna.com', 'resident', 'female', '1', 46),
+(47, 'Dr. Wael Jassar', 'wael.j@doctorna.com', 'specialist', 'male', '1', 47),
+(48, 'Dr. Hanan Turk', 'hanan.t@doctorna.com', 'intern', 'female', '1', 48),
+(49, 'Dr. Sherif Ramzy', 'sherif.r@doctorna.co', 'senior specialist', 'male', '1', 49),
+(50, 'Dr. Mirna Nour', 'mirna.n@doctorna.com', 'consultant', 'female', '1', 50);
 
 -- --------------------------------------------------------
 
@@ -244,7 +246,8 @@ INSERT INTO `doctors` (`id`, `name`, `email`, `rank`, `gender`, `availability`, 
 CREATE TABLE `speciality` (
   `id` int(12) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `description` varchar(50) NOT NULL
+  `description` text NOT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -313,7 +316,8 @@ CREATE TABLE `sub_services` (
   `id` int(12) NOT NULL,
   `name` varchar(15) NOT NULL,
   `fees` decimal(30,0) NOT NULL,
-  `description` varchar(50) NOT NULL
+  `description` text NOT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -380,13 +384,14 @@ INSERT INTO `sub_services` (`id`, `name`, `fees`, `description`) VALUES
 
 CREATE TABLE `users` (
   `id` int(12) NOT NULL,
-  `name` varchar(30) NOT NULL,
-  `email` varchar(30) NOT NULL,
-  `password` varchar(30) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `password` varchar(255) NOT NULL,
   `age` int(10) NOT NULL,
   `gender` enum('male','female') NOT NULL,
-  `phone` int(20) NOT NULL,
-  `role` enum('admin','user') NOT NULL
+  `phone` varchar(20) NOT NULL,
+  `role` enum('admin','user') NOT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -550,3 +555,4 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
