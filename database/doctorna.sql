@@ -185,7 +185,7 @@ CREATE TABLE `doctors` (
 -- Dumping data for table `doctors`
 --
 
-INSERT INTO `doctors` (`id`, `name`, `email`, `rank`, `gender`, `availability`, `spec_id`) VALUES
+INSERT INTO `doctors` (`id`, `name`, `email`, `rank`, `gender`, `is_available`, `spec_id`) VALUES
 (1, 'Dr. Tarek Hegazi', 'tarek@doctorna.com', 'consultant', 'male', '1', 1),
 (2, 'Dr. Mona El-Assal', 'mona@doctorna.com', 'senior specialist', 'female', '1', 2),
 (3, 'Dr. Amr Diab', 'amr.d@doctorna.com', 'specialist', 'male', '1', 3),
@@ -555,4 +555,5 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
 
