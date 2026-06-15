@@ -23,8 +23,8 @@ function getuserbyemail($email){
 //2.signup
 function createuser($data){
     global $conn;
-    $create="insert into `users` (name,email,password,age,gender,role) 
-    values(:name,:email,:password,:age,:gender,:role)";
+    $create="insert into `users` (name,email,password,age,gender,phone,role) 
+    values(:name,:email,:password,:age,:gender,:phone,:role)";
     $creation=$conn->prepare($create);
     return $creation->execute([
      'name'=>$data['name'],
@@ -32,6 +32,7 @@ function createuser($data){
      'password'=>$data['password'],
      'age'=>$data['age'],
      'gender'=>$data['gender'],
+     'phone'=>$data['phone'] ?? '',
      'role'=>$data['role']
     ]);
 }

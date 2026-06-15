@@ -27,7 +27,7 @@ function login($data){
         exit;
     }
     $token=GenerateToken($userdata);
-    response(200,["message"=>"Logged in Successfully, Welcome !","token"=>$token]);
+    response(200, "Logged in Successfully, Welcome !", ["token"=>$token]);
     exit;
 }
 //name, email ,password, gender, role
@@ -40,9 +40,10 @@ function login($data){
         $pass=$data['password'] ?? '';
         $age=$data['age'] ?? '';
         $gender=$data['gender'] ?? '';
+        $phone=$data['phone'] ?? '';
         $role=$data['role'] ?? '';
      //if data empty: message you should insert data
-     if(empty($name) || empty($email) || empty($pass) || empty($age) ||empty($gender) || empty($role)){
+     if(empty($name) || empty($email) || empty($pass) || empty($age) ||empty($gender) || empty($phone) || empty($role)){
         response(400,"Please, Fill in all required fields !");
      }
      if(!filter_var($email,FILTER_VALIDATE_EMAIL)){
@@ -63,7 +64,4 @@ function login($data){
      exit;
     }
 
-
 ?>
-
-

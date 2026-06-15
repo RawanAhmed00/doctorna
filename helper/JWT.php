@@ -1,6 +1,6 @@
 <?php
-require '../vendor/autoload.php';
-require_once '../helper/response.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/response.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
