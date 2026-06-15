@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ .'/../config/database.php';
-require_once __DIR__ .'/../repos/AuthRepo.php';
+require_once __DIR__ .'/../repos/UserRepo.php';
 require_once __DIR__ .'/../helper/JWT.php';
 require_once __DIR__ .'/../helper/response.php';
 
