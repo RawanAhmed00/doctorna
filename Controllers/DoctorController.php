@@ -7,7 +7,6 @@ require_once __DIR__ . '/../helper/jwt.php';
 require_once __DIR__ . '/../helper/cache.php';
 require_once __DIR__ . '/../repos/DoctorRepo.php';
 
-// --- Local Helpers for DRY Code ---
 
 function validateDoctorData($data) {
     if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
@@ -40,18 +39,13 @@ function getDoctor($conn, $id) {
 }
 
 function clearDoctorCache($id = null) {
-    global $redis;
-    try {
-        $redis->del('doctors:all');
-        if ($id) {
-            $redis->del('doctor:' . $id);
-        }
-    } catch (\Exception $e) {
-        // Redis is down, fail gracefully
+    $keysToDelete = ['doctors:all'];
+    if ($id) {
+        $keysToDelete[] = 'doctor:' . $id;
     }
+    deleteFromCache($keysToDelete);
 }
 
-// --- Controller Logic ---
 
 function handleGetAllDoctors($conn) {
     $cacheKey = 'doctors:all';

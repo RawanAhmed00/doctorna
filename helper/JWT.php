@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/env.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/status.php';
 require_once __DIR__ . '/response.php';
@@ -14,7 +15,8 @@ $payload=[
 "role" => $user['role']
 ];
 
-return JWT::encode($payload,"B0RN0Jx6muUoyGJGmahlRiQJ6mpNXEDQShyHT8bCbYp","HS256");
+$secret = env('JWT_SECRET', "B0RN0Jx6muUoyGJGmahlRiQJ6mpNXEDQShyHT8bCbYp");
+return JWT::encode($payload, $secret, "HS256");
 
 }
 
@@ -29,7 +31,8 @@ if(!$token){
 $token = str_replace("Bearer " ,"",$token);
 
 try{
-$decoded = JWT::decode($token , new key("B0RN0Jx6muUoyGJGmahlRiQJ6mpNXEDQShyHT8bCbYp" , "HS256"));
+$secret = env('JWT_SECRET', "B0RN0Jx6muUoyGJGmahlRiQJ6mpNXEDQShyHT8bCbYp");
+$decoded = JWT::decode($token , new key($secret , "HS256"));
 
 return $decoded;
 }catch(Exception $e){

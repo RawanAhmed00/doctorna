@@ -17,3 +17,5 @@ Thumbs.db
 *.log
 /cache/
 /tmp/
+
+.env

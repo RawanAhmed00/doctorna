@@ -3,17 +3,37 @@ require_once __DIR__ .'/../config/database.php';
 require_once __DIR__ .'/../repos/AuthRepo.php';
 require_once __DIR__ .'/../helper/request.php';
 require_once __DIR__ .'/../helper/status.php';
+require_once __DIR__ .'/../helper/response.php';
 require_once __DIR__ .'/../Controllers/AuthController.php';
 
-$path = $_SERVER["PATH_INFO"] ?? "/";
+$uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+$action = basename($uri);               
+$module = basename(dirname($uri));      
+
 $method = $_SERVER["REQUEST_METHOD"];
 
-if ($method === 'POST' && $path === '/auth/login') {
-    $data = getJsonInput(['email', 'password']);
-    login($data);
-} elseif ($method === 'POST' && $path === '/auth/register') {
-    $data = getJsonInput(['name', 'email', 'password', 'age', 'gender', 'phone', 'role']);
-    register($data);
+if ($module === 'auth') {
+    if ($method !== 'POST') {
+        methodNotAllowed();
+    }
+
+    switch ($action) {
+        case 'login':
+            handleLogin($conn);
+            break;
+        case 'register':
+            handleRegister($conn);
+            break;
+        case 'forgot-password':
+            handleForgotPassword($conn);
+            break;
+        case 'reset-password':
+            handleResetPassword($conn);
+            break;
+        default:
+            response(HttpStatus('NOT_FOUND'), "API Endpoint Not Found");
+            break;
+    }
 } else {
-    response(HttpStatus('NOT_FOUND'), "Wrong Route!");
+    response(HttpStatus('NOT_FOUND'), "API Module Not Found");
 }

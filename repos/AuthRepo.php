@@ -1,5 +1,7 @@
 <?php
-require __DIR__ .'/../config/database.php';
+require_once __DIR__ .'/../config/database.php';
+require_once __DIR__ .'/../helper/db.php';
+
 // start with logging in(
 // 1-check if this email exists, if exists:1-check of the password written to password in database
 // if correct :tal3 message:Welcome!
@@ -11,30 +13,31 @@ require __DIR__ .'/../config/database.php';
 
 //authentication repo:
 //1.login: get user by email
-function getuserbyemail($email){
-    global $conn;
-    $get="select * from `users` where email=?";
-    $getting=$conn->prepare($get);
-    $getting->execute([$email]);
-    $user=$getting->fetch(PDO::FETCH_ASSOC);
-    return $user;
+function getUserByEmail($conn, $email){
+    $sql = "SELECT * FROM `users` WHERE email = :email";
+    $stmt = runQuery($conn, $sql, ['email' => $email]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
 //2.signup
-function createuser($data){
-    global $conn;
-    $create="insert into `users` (name,email,password,age,gender,phone,role) 
-    values(:name,:email,:password,:age,:gender,:phone,:role)";
-    $creation=$conn->prepare($create);
-    return $creation->execute([
-     'name'=>$data['name'],
-     'email'=>$data['email'],
-     'password'=>$data['password'],
-     'age'=>$data['age'],
-     'gender'=>$data['gender'],
-     'phone'=>$data['phone'] ?? '',
-     'role'=>$data['role']
+function createUser($conn, $data){
+    $sql = "INSERT INTO `users` (name, email, password, age, gender, phone, role) 
+            VALUES (:name, :email, :password, :age, :gender, :phone, :role)";
+    $stmt = runQuery($conn, $sql, [
+        'name'     => $data['name'],
+        'email'    => $data['email'],
+        'password' => $data['password'],
+        'age'      => $data['age'],
+        'gender'   => $data['gender'],
+        'phone'    => $data['phone'] ?? '',
+        'role'     => $data['role']
     ]);
+    return $stmt->rowCount() > 0;
 }
 
+function updateUserPassword($conn, $email, $hashedPassword){
+    $sql = "UPDATE `users` SET password = :password WHERE email = :email";
+    $stmt = runQuery($conn, $sql, ['password' => $hashedPassword, 'email' => $email]);
+    return $stmt->rowCount() > 0;
+}
 ?>

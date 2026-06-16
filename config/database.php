@@ -1,12 +1,11 @@
 <?php
-// Database configuration will go here
-
+require_once __DIR__ . '/../helper/env.php';
 
 $config = [
-    "host" => "localhost",
-    "user"=> "root",
-    "password" => "",
-    "database" => "doctorna"
+    "host" => env('DB_HOST', 'localhost'),
+    "user"=> env('DB_USER', 'root'),
+    "password" => env('DB_PASS', ''),
+    "database" => env('DB_NAME', 'doctorna')
 ];
 
 try {
