@@ -38,55 +38,6 @@ function GetUserById()
     );
 }
 
-function AddUser()
-{
-    $data = json_decode(
-        file_get_contents("php://input"),
-        true
-    );
 
-    if(
-        empty($data["name"]) ||
-        empty($data["email"]) ||
-        empty($data["password"]) ||
-        empty($data["age"]) ||
-        empty($data["gender"]) ||
-        empty($data["phone"]) ||
-        empty($data["role"])
-    )
-    {
-        response(
-            422,
-            "Missing Required Fields"
-        );
-    }
 
-    $hashedPassword = password_hash(
-        $data["password"],
-        PASSWORD_DEFAULT
-    );
-
-    $result = AddUserRepo(
-        $data["name"],
-        $data["email"],
-        $hashedPassword,
-        $data["age"],
-        $data["gender"],
-        $data["phone"],
-        $data["role"]
-    );
-
-    if($result)
-    {
-        response(
-            200,
-            "User Added"
-        );
-    }
-
-    response(
-        500,
-        "Failed"
-    );
-}
 

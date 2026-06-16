@@ -17,7 +17,3 @@ if($method == "GET")
         GetUsers();
     }
 }
-elseif($method == "POST")
-{
-    AddUser($conn);
-}
