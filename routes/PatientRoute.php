@@ -9,7 +9,7 @@ if($method == "GET")
 {
     if(isset($_GET["id"]))
     {
-        GetUserById($conn);
+        GetUserById();
     }
     else
     {

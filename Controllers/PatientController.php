@@ -5,7 +5,6 @@ require_once __DIR__ . "/../helper/response.php";
 
 function GetUsers()
 {
-    echo json_encode("ana hena");
     $result = GetAllUsersRepo();
 
     response(
