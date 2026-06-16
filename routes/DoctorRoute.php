@@ -6,10 +6,10 @@ require_once __DIR__ . '/../helper/status.php';
 require_once __DIR__ . '/../helper/response.php';
 require_once __DIR__ . '/../Controllers/DoctorController.php';
 
-$path = $_SERVER["PATH_INFO"] ?? "/";
+$slug = basename(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH));
 $method = $_SERVER["REQUEST_METHOD"];
 
-if ($path === "/doctors") {
+if ($slug === "doctors") {
     switch ($method) {
         case "GET":
             if (isset($_GET['id'])) {

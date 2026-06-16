@@ -9,6 +9,28 @@ require_once __DIR__ . '/../repos/DoctorRepo.php';
 
 // --- Local Helpers for DRY Code ---
 
+function validateDoctorData($data) {
+    if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid email format");
+    }
+    
+    if (isset($data['rank']) && !in_array(strtolower($data['rank']), ['intern', 'resident', 'specialist', 'senior specialist', 'consultant'])) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid rank. Allowed values: intern, resident, specialist, senior specialist, consultant");
+    }
+
+    if (isset($data['gender']) && !in_array(strtolower($data['gender']), ['male', 'female'])) {
+        response(HttpStatus('BAD_REQUEST'), "Gender must be either 'male' or 'female'");
+    }
+
+    if (isset($data['is_available']) && !in_array($data['is_available'], [0, 1, '0', '1', true, false], true)) {
+        response(HttpStatus('BAD_REQUEST'), "is_available must be 0 or 1");
+    }
+
+    if (isset($data['spec_id']) && !is_numeric($data['spec_id'])) {
+        response(HttpStatus('BAD_REQUEST'), "spec_id must be a numeric ID");
+    }
+}
+
 function getDoctor($conn, $id) {
     $doctor = getDoctorById($conn, $id);
     if (!$doctor) {
@@ -65,6 +87,8 @@ function handleCreateDoctor($conn) {
     // Require all fields for creation
     $data = getJsonInput(['name', 'email', 'rank', 'gender', 'spec_id']);
 
+    validateDoctorData($data);
+
     $newDoctor = createDoctor($conn, $data);
 
     clearDoctorCache();
@@ -80,6 +104,8 @@ function handleUpdateDoctor($conn) {
 
     // Require all fields for full PUT update
     $data = getJsonInput(['name', 'email', 'rank', 'gender', 'is_available', 'spec_id']);
+
+    validateDoctorData($data);
 
     $updatedDoctor = updateDoctor($conn, $id, $data);
 
@@ -100,6 +126,8 @@ function handlePatchDoctor($conn) {
     if (empty($data)) {
         response(HttpStatus('BAD_REQUEST'), "No fields provided for update");
     }
+
+    validateDoctorData($data);
 
     $updatedDoctor = null;
     $allowed = ['name', 'email', 'rank', 'gender', 'is_available', 'spec_id'];

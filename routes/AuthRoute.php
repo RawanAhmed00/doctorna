@@ -1,23 +1,19 @@
 <?php
 require_once __DIR__ .'/../config/database.php';
 require_once __DIR__ .'/../repos/AuthRepo.php';
+require_once __DIR__ .'/../helper/request.php';
+require_once __DIR__ .'/../helper/status.php';
 require_once __DIR__ .'/../Controllers/AuthController.php';
 
+$path = $_SERVER["PATH_INFO"] ?? "/";
+$method = $_SERVER["REQUEST_METHOD"];
 
-$slug=basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-$method=$_SERVER['REQUEST_METHOD'];
-$data=json_decode((file_get_contents('php://input')), true);
-
-if($_SERVER['REQUEST_METHOD'] =='POST' && $slug =='login'){
+if ($method === 'POST' && $path === '/auth/login') {
+    $data = getJsonInput(['email', 'password']);
     login($data);
+} elseif ($method === 'POST' && $path === '/auth/register') {
+    $data = getJsonInput(['name', 'email', 'password', 'age', 'gender', 'phone', 'role']);
+    register($data);
+} else {
+    response(HttpStatus('NOT_FOUND'), "Wrong Route!");
 }
-elseif($_SERVER['REQUEST_METHOD']=='POST' && $slug=='register'){
-   register($data);
-}
-else{
-    response(404,"Wrong Route!");
-}
-
-
-
-?>
