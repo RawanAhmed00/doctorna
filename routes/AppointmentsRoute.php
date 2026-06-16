@@ -1,17 +1,19 @@
 <?php
 
-require __DIR__ . "/../connection.php";
+require __DIR__ . "/../config/database.php";
 require __DIR__ ."/../Controllers/AppointmentController.php";
 
-$path=$_SERVER["PATH_INFO"];
+$path=$_SERVER["PATH_INFO"] ?? '';
 $method=$_SERVER["REQUEST_METHOD"];
 
-if($method=="GET"&& $path =="/Appointment"&& isset ($_GET["id"])){
-    GetById($connection,$id );
-}elseif ($method=="GET" && $path== "/Appointment")
+if($method=="GET" && $path =="/appointment" && isset ($_GET["id"])){
+   getappointmentbyid($conn,$_GET["id"]);
+}
+elseif($method=="GET" && $path== "/appointment")
 {
-    GetALL ($connection );
-}elseif ($method =="PATCH" && $path == "/Appointment")
+  getallappointments($conn);
+}
+elseif($method =="POST" && $path == "/appointment")
 {
-    UpdateAppointment($connection);
+    postappointment($conn);
 }
