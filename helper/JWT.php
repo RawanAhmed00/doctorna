@@ -1,6 +1,7 @@
 <?php
-require '../vendor/autoload.php';
-require_once '../helper/response.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/status.php';
+require_once __DIR__ . '/response.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -23,7 +24,7 @@ $headers = getallheaders();
 $token = $headers['Authorization']??'';
 
 if(!$token){
- response(401,"token is requird ");
+ response(HttpStatus('UNAUTHORIZED'), "token is requird ");
 }
 $token = str_replace("Bearer " ,"",$token);
 
@@ -32,12 +33,17 @@ $decoded = JWT::decode($token , new key("B0RN0Jx6muUoyGJGmahlRiQJ6mpNXEDQShyHT8b
 
 return $decoded;
 }catch(Exception $e){
-    response(401 , "invalid token");
+    response(HttpStatus('UNAUTHORIZED') , "invalid token");
 }
 }
 
 function require_admin($verifiedToken){
     if($verifiedToken->role !== "admin"){
-        response(403,"access denied admin");
+        response(HttpStatus('FORBIDDEN'), "access denied admin");
     }
+}
+
+function checkAdminPrivileges() {
+    $token = VerifyToken();
+    require_admin($token);
 }

@@ -19,5 +19,5 @@ function response($code, $message = "", $data = null) {
 }
 
 function methodNotAllowed() {
-    response(405, "Method Not Allowed");
+    response(HttpStatus('METHOD_NOT_ALLOWED'), "Method Not Allowed");
 }

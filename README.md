@@ -6,7 +6,7 @@
 ![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
 ## 📖 Project Overview
-Doctorna is the core RESTful API backend for managing tasks, users, and operations. It is built entirely in raw PHP using an elegant, custom MVC-like architecture modeled after Task-05. It relies heavily on strict separation of concerns: routing HTTP requests to Controllers, executing database logic in Repositories, and standardizing outputs via Helpers.
+Doctorna is the core RESTful API backend for managing tasks, users, and operations. It is built entirely in raw PHP using an elegant, custom MVC-like architecture. It relies heavily on strict separation of concerns: routing HTTP requests to Controllers, executing database logic in Repositories, and standardizing outputs via Helpers.
 
 ## ✨ Features
 - **Strict Separation of Concerns:** Router -> Controller -> Repository.
