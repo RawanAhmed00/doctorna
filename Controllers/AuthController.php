@@ -14,23 +14,23 @@ function login($data){
         response(400,"Invalid Email Format, Please enter a valid one");
         exit;
     }
-    //8er kda:el mail sa7 so: get all mails from the function that gets all mails
+    //otherwise, mail is correct, so get all mails
     $userdata=getuserbyemail($email);
-    //kda b2a 3andy kol el mails: i have to make sure mail is in db
+    //now, having all mails, check if mail i in database
     if(!$userdata){
         response(404,"User not Found, Please Register !");
         exit;
     }
-    //password turn:if pass != database pass
+    //if pass != database pass
     if(!password_verify($pass, $userdata['password'])){
         response(401,"Wrong Password !");
         exit;
     }
     $token=GenerateToken($userdata);
-    response(200,["message"=>"Logged in Successfully, Welcome !","token"=>$token]);
+    response(200, "Logged in Successfully, Welcome !", ["token"=>$token]);
     exit;
 }
-//name, email ,password, gender, role
+//name, email ,password, gender,phone , role
 
     function register($data){
         $data['gender']=strtolower($data['gender'] ?? '');
@@ -63,8 +63,5 @@ function login($data){
      response(201,"User registered successfully !");
      exit;
     }
-
-
+    
 ?>
-
-

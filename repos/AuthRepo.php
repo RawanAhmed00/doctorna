@@ -1,13 +1,13 @@
 <?php
 require __DIR__ .'/../config/database.php';
-// start with logging in(
-// 1-check if this email exists, if exists:1-check of the password written to password in database
-// if correct :tal3 message:Welcome!
+// start with logging in:
+// 1-check if this email exists, if exists:1-check the password written to password in database
+// if correct  message:Welcome!
 // if not correct message:password not correct
 // if email does not exist: user not found, please sign up
 // if yes: welcome to the system
 // if not please sign up to proceed
-// then sign up function
+// 2-then sign up function
 
 //authentication repo:
 //1.login: get user by email
@@ -27,12 +27,12 @@ function createuser($data){
     values(:name,:email,:password,:age,:gender,:phone,:role)";
     $creation=$conn->prepare($create);
     return $creation->execute([
-     'name'=>$data['name'],
-     'email'=>$data['email'],
+     'name'=>$data['name'] ,
+     'email'=>$data['email'] ,
      'password'=>$data['password'],
-     'age'=>$data['age'],
-     'gender'=>$data['gender'],
-     'phone'=>$data['phone'],
+     'age'=>$data['age'] ,
+     'gender'=>$data['gender']  ,
+     'phone'=>$data['phone'] ,
      'role'=>$data['role']
     ]);
 }
