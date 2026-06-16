@@ -2,18 +2,18 @@
 
 //GET BY ID 
 
-function GetById ($connection , $id){
+  function GetById ($conn , $id){
     $query="select * from Appointments where id=?";
-    $getByID =$connection->prepare($query);
+    $getByID =$conn->prepare($query);
     $getByID->execute ([$id]);
     return $getByID->fetch(PDO::FETCH_ASSOC);
 
     }
 
     // GET ALL
-    function GatAll ($connection){
+   function GatAll ($conn){
         $query ="select id , status , date_time , user_id , doc_id ";
-        $getAppointments=$connection->prepare($query);
+        $getAppointments=$conn->prepare($query);
         $getAppointments->execute();
         return $getAppointments ->fetchAll (PDO::FETCH_ASSOC);
 
@@ -21,9 +21,9 @@ function GetById ($connection , $id){
 
     //POST
 
-    function Update ($connection , $id , $status , $date_time , $user_id , $doc_id){
+   function PostAppointment ($conn , $id , $status , $date_time , $user_id , $doc_id){
 
-    $update = $connection->prepare("update Appointments  set status=? , date_time=? , user_id=? , doc_id=? where id=?");
+    $update = $conn->prepare("update Appointments  set status=? , date_time=? , user_id=? , doc_id=? where id=?");
     $update ->execute ([$id , $status ,$date_time , $user_id , $doc_id]);
 
     return $update ->rowCount ()>0 ;
