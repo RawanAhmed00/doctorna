@@ -16,7 +16,7 @@ function login($data){
     }
     //8er kda:el mail sa7 so: get all mails from the function that gets all mails
     $userdata=getuserbyemail($email);
-    //kda b2a 3andy kil el mails:h ihave to make sure mail is in db
+    //kda b2a 3andy kol el mails: i have to make sure mail is in db
     if(!$userdata){
         response(404,"User not Found, Please Register !");
         exit;
@@ -40,13 +40,14 @@ function login($data){
         $pass=$data['password'] ?? '';
         $age=$data['age'] ?? '';
         $gender=$data['gender'] ?? '';
+        $phone=$data['phone'] ?? '';
         $role=$data['role'] ?? '';
      //if data empty: message you should insert data
-     if(empty($name) || empty($email) || empty($pass) || empty($age) ||empty($gender) || empty($role)){
+     if(empty($name) || empty($email) || empty($pass) || empty($age) ||empty($gender)|| empty($phone) || empty($role)){
         response(400,"Please, Fill in all required fields !");
      }
      if(!filter_var($email,FILTER_VALIDATE_EMAIL)){
-        response(400,"In valid email format !");
+        response(400,"Invalid email format !");
         exit;
      }
     $checkuser=getuserbyemail($email);
