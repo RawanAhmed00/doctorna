@@ -1,23 +1,11 @@
 <?php
-
-require_once __DIR__ . "/status.php";
-
-function response($code, $message = "", $data = null) {
+function response($code, $message, $data = null) {
     header("Content-Type: application/json");
     http_response_code($code);
-    
-    if (empty($message)) {
-        $message = getHttpStatusMessage($code);
+    $response = ["message" => $message];
+    if ($data !== null) {
+        $response["data"] = $data;
     }
-
-    echo json_encode([
-        "status_code" => $code,
-        "message" => $message,
-        "data" => $data
-    ]);
+    echo json_encode($response);
     exit;
-}
-
-function methodNotAllowed() {
-    response(405, "Method Not Allowed");
 }
