@@ -1,42 +1,25 @@
 <?php
 
-require_once __DIR__ . '/../Controllers/SubServiceController.php';
+require __DIR__ . "/../config/database.php";
+require __DIR__ . "/../Controllers/SubServiceController.php";
 
-use App\Controllers\SubServiceController;
+$path = $_SERVER["PATH_INFO"] ?? '';
+$method = $_SERVER["REQUEST_METHOD"];
 
-$controller = new SubServiceController();
-$requestMethod = $_SERVER['REQUEST_METHOD'];
-
-
-$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-
-if (strpos($requestUri, '/doctorna') === 0) {
-    $requestUri = substr($requestUri, strlen('/doctorna'));
-}
-$requestUri = rtrim($requestUri, '/');
-if (empty($requestUri)) {
-    $requestUri = '/';
+if (empty($path)) {
+    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    if (strpos($path, '/doctorna') === 0) {
+        $path = substr($path, strlen('/doctorna'));
+    }
+    $path = rtrim($path, '/');
 }
 
-
-if ($requestUri === '/sub-services') {
-    if ($requestMethod === 'GET') {
-        $controller->getAll();
-    } elseif ($requestMethod === 'POST') {
-        $controller->create();
-    } else {
-        require_once __DIR__ . '/../helper/response.php';
-        methodNotAllowed();
-    }
-} elseif (preg_match('#^/sub-services/(\d+)$#', $requestUri, $matches)) {
-    $id = (int)$matches[1];
-    if ($requestMethod === 'GET') {
-        $controller->getById($id);
-    } else {
-        require_once __DIR__ . '/../helper/response.php';
-        methodNotAllowed();
-    }
+if ($method == "GET" && $path == "/sub-services" && isset($_GET["id"])) {
+    getSubServiceByIdHandler($conn, $_GET["id"]);
+} elseif ($method == "GET" && $path == "/sub-services") {
+    getAllSubServicesHandler($conn);
+} elseif ($method == "POST" && $path == "/sub-services") {
+    createSubServiceHandler($conn);
 } else {
     require_once __DIR__ . '/../helper/response.php';
     response(404, "Endpoint not found");

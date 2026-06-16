@@ -1,41 +1,28 @@
 <?php
 
-namespace App\repos;
+require_once __DIR__ . '/../helper/db.php';
 
-use PDO;
+function getAllSubServices($conn) {
+    $sql = "SELECT * FROM sub_services WHERE deleted_at IS NULL";
+    $stmt = runQuery($conn, $sql);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-class SubServiceRepo {
-    private PDO $db;
+function getSubServiceById($conn, $id) {
+    $sql = "SELECT * FROM sub_services WHERE id = :id AND deleted_at IS NULL";
+    $stmt = runQuery($conn, $sql, ['id' => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
-    public function __construct(PDO $db) {
-        $this->db = $db;
-    }
+function createSubService($conn, $data) {
+    $sql = "INSERT INTO sub_services (name, fees, description)
+            VALUES (:name, :fees, :description)";
 
-    public function getAll(): array {
-        $query = "SELECT * FROM sub_services WHERE deleted_at IS NULL";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    runQuery($conn, $sql, [
+        'name' => $data['name'],
+        'fees' => $data['fees'],
+        'description' => $data['description']
+    ]);
 
-    public function getById(int $id): ?array {
-        $query = "SELECT * FROM sub_services WHERE id = :id AND deleted_at IS NULL";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['id' => $id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ?: null;
-    }
-
-    public function create(array $data): ?array {
-        $query = "INSERT INTO sub_services (name, fees, description) VALUES (:name, :fees, :description)";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([
-            'name'        => $data['name'],
-            'fees'        => $data['fees'],
-            'description' => $data['description']
-        ]);
-        
-        $newId = (int)$this->db->lastInsertId();
-        return $this->getById($newId);
-    }
+    return getSubServiceById($conn, $conn->lastInsertId());
 }

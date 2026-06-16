@@ -1,97 +1,69 @@
 <?php
 
-namespace App\Controllers;
-
 require_once __DIR__ . '/../helper/response.php';
 require_once __DIR__ . '/../helper/request.php';
 require_once __DIR__ . '/../helper/JWT.php';
 require_once __DIR__ . '/../helper/cache.php';
+require_once __DIR__ . '/../repos/SubServiceRepo.php';
 
-use App\repos\SubServiceRepo;
 
-class SubServiceController {
-    private SubServiceRepo $repo;
+function getAllSubServicesHandler($conn) {
+    VerifyToken();
 
-    public function __construct() {
-        global $conn;
-        if (!isset($conn)) {
-            require_once __DIR__ . '/../config/database.php';
-        }
-        $this->repo = new SubServiceRepo($conn);
+    $cacheKey = 'subservices:all';
+
+    serveFromCacheIfAvailable($cacheKey, "Sub services fetched successfully");
+
+    $data = getAllSubServices($conn);
+
+    saveToCache($cacheKey, $data);
+
+    response(200, "Sub services fetched successfully", [
+        'source' => 'database',
+        'data' => $data
+    ]);
+}
+
+
+function getSubServiceByIdHandler($conn, $id) {
+    VerifyToken();
+
+    $cacheKey = "subservices:$id";
+
+    serveFromCacheIfAvailable($cacheKey, "Sub service fetched successfully");
+
+    $data = getSubServiceById($conn, $id);
+
+    if (!$data) {
+        response(404, "Sub service not found");
     }
 
-    
+    saveToCache($cacheKey, $data);
 
-    public function getAll(): void {
+    response(200, "Sub service fetched successfully", [
+        'source' => 'database',
+        'data' => $data
+    ]);
+}
 
-        VerifyToken();
 
+function createSubServiceHandler($conn) {
+    $verifiedToken = VerifyToken();
+    require_admin($verifiedToken);
 
-        $cacheKey = 'subservices:all';
-        $cachedData = \Cache::get($cacheKey);
-        if ($cachedData !== null) {
-            response(200, "Sub services retrieved successfully from cache", $cachedData);
-        }
+    $data = getJsonInput(['name', 'fees', 'description']);
 
-    
-        $data = $this->repo->getAll();
-
-    
-        \Cache::set($cacheKey, $data, 3600); 
-        response(200, "Sub services retrieved successfully", $data);
+    if (strlen($data['name']) > 15) {
+        response(400, "Name must not exceed 15 characters");
     }
 
-    public function getById(int $id): void {
-        
-        VerifyToken();
-
-    
-        $cacheKey = "subservices:id:{$id}";
-        $cachedData = \Cache::get($cacheKey);
-        if ($cachedData !== null) {
-            response(200, "Sub service retrieved successfully from cache", $cachedData);
-        }
-
-        
-        $data = $this->repo->getById($id);
-        if ($data === null) {
-            response(404, "Sub service not found");
-        }
-
-    
-        \Cache::set($cacheKey, $data, 3600);
-        response(200, "Sub service retrieved successfully", $data);
+    if (!is_numeric($data['fees']) || $data['fees'] < 0) {
+        response(400, "Invalid fees value");
     }
 
+    $new = createSubService($conn, $data);
 
-    public function create(): void {
-    
-        $token = VerifyToken();
-        require_admin($token);
+    deleteFromCache('subservices:all');
 
-    
-        $input = getJsonInput(['name', 'fees', 'description']);
-
-    
-        if (strlen($input['name']) > 15) {
-            response(422, "The name field must not exceed 15 characters.");
-        }
-
-    
-        if (!is_numeric($input['fees']) || $input['fees'] < 0) {
-            response(422, "The fees field must be a non-negative number.");
-        }
-
-    
-        $newSubService = $this->repo->create($input);
-        if ($newSubService === null) {
-            response(500, "Failed to create sub service.");
-        }
-
-    
-        \Cache::delete('subservices:all');
-
-    
-        response(201, "Sub service created successfully", $newSubService);
-    }
+    response(201, "Sub service created successfully", $new);
 }
