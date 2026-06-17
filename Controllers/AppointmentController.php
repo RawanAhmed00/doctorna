@@ -7,6 +7,34 @@ require_once __DIR__ . '/../helper/request.php';
 require_once __DIR__ . '/../helper/JWT.php';
 require_once __DIR__ . '/../helper/pagination.php';
 
+// ==========================================
+// VALIDATION HELPERS
+// ==========================================
+function validateAppointmentData(&$data) {
+    if (isset($data['status'])) {
+        $data['status'] = strtolower($data['status']);
+        $acceptedStatus = ['pending', 'confirmed', 'cancelled', 'completed'];
+        if (!in_array($data['status'], $acceptedStatus, true)) {
+            response(HttpStatus('BAD_REQUEST'), "Invalid status. Allowed: pending, confirmed, cancelled, completed");
+        }
+    }
+    
+    if (isset($data['date_time'])) {
+        $dt = $data['date_time'];
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dt) && !preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $dt)) {
+            response(HttpStatus('BAD_REQUEST'), "Invalid date_time format. Format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS");
+        }
+    }
+
+    if (isset($data['doc_id']) && !is_numeric($data['doc_id'])) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid doc_id. Must be numeric.");
+    }
+
+    if (isset($data['user_id']) && !is_numeric($data['user_id'])) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid user_id. Must be numeric.");
+    }
+}
+
 function getAppointment($conn, $id) {
     $appointment = getAppointmentById($conn, $id);
     if (!$appointment) {
@@ -28,26 +56,8 @@ function handleGetAppointmentById($conn) {
 function handleGetAllAppointments($conn) {
     $token = VerifyToken();
 
-    // Validate incoming filter values if they exist
-    if (isset($_GET['status'])) {
-        $status = strtolower($_GET['status']);
-        $acceptedStatus = ['pending', 'confirmed', 'cancelled', 'completed'];
-        if (!in_array($status, $acceptedStatus, true)) {
-            response(HttpStatus('BAD_REQUEST'), "Invalid status filter. Allowed: pending, confirmed, cancelled, completed");
-        }
-    }
-    if (isset($_GET['date_time'])) {
-        $dt = $_GET['date_time'];
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dt) && !preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $dt)) {
-            response(HttpStatus('BAD_REQUEST'), "Invalid date_time filter format. Format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS");
-        }
-    }
-    if (isset($_GET['doc_id']) && !is_numeric($_GET['doc_id'])) {
-        response(HttpStatus('BAD_REQUEST'), "Invalid doc_id filter. Must be numeric.");
-    }
-    if (isset($_GET['user_id']) && !is_numeric($_GET['user_id'])) {
-        response(HttpStatus('BAD_REQUEST'), "Invalid user_id filter. Must be numeric.");
-    }
+    // Reuse validation guard for filter parameters
+    validateAppointmentData($_GET);
 
     if ($token->role === "user") {
         $appointments = getAppointmentsByUserId($conn, $token->user_id);
@@ -69,14 +79,8 @@ function handleCreateAppointment($conn) {
 
     $data = getJsonInput(['status', 'date_time', 'doc_id']);
     
-    $status = strtolower($data['status']);
-    $acceptedStatus = ['pending', 'confirmed', 'cancelled', 'completed'];
+    validateAppointmentData($data);
 
-    if (!in_array($status, $acceptedStatus, true)) {
-        response(HttpStatus('BAD_REQUEST'), "Invalid status. Allowed: pending, confirmed, cancelled, completed");
-    }
-
-    $data['status'] = $status;
     $data['user_id'] = $token->user_id; // Securely take from token
 
     $newAppointment = createAppointment($conn, $data);
@@ -104,14 +108,7 @@ function handleUpdateAppointment($conn) {
         'doc_id' => $data['doc_id'] ?? $appointment['doc_id']
     ];
 
-    if (isset($data['status'])) {
-        $status = strtolower($data['status']);
-        $acceptedStatus = ['pending', 'confirmed', 'cancelled', 'completed'];
-        if (!in_array($status, $acceptedStatus, true)) {
-            response(HttpStatus('BAD_REQUEST'), "Invalid status. Allowed: pending, confirmed, cancelled, completed");
-        }
-        $updateData['status'] = $status;
-    }
+    validateAppointmentData($updateData);
 
     $updatedAppointment = updateAppointment($conn, $id, $updateData);
     response(HttpStatus('OK'), "Appointment updated successfully", $updatedAppointment);

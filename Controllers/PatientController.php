@@ -7,6 +7,21 @@ require_once __DIR__ . '/../helper/request.php';
 require_once __DIR__ . '/../helper/cache.php';
 require_once __DIR__ . '/../helper/JWT.php';
 
+// ==========================================
+// VALIDATION HELPERS
+// ==========================================
+function validatePatientData($data) {
+    if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid email format");
+    }
+    if (isset($data['age']) && (!is_numeric($data['age']) || $data['age'] <= 0 || $data['age'] > 120)) {
+        response(HttpStatus('BAD_REQUEST'), "Age must be a valid positive number between 1 and 120");
+    }
+    if (isset($data['gender']) && !in_array(strtolower($data['gender']), ['male', 'female'])) {
+        response(HttpStatus('BAD_REQUEST'), "Gender must be either 'male' or 'female'");
+    }
+}
+
 function getPatient($conn, $id) {
     $patient = getPatientById($conn, $id);
     if (!$patient) {
@@ -28,11 +43,12 @@ function clearPatientCache($id = null) {
 
 function handleGetAllPatients($conn) {
     checkAdminPrivileges();
+    
+    // Reuse validation guard for filter parameters
+    validatePatientData($_GET);
 
-    $cacheKey = "patients:all";
-    if (isset($_GET['gender'])) {
-        $cacheKey = "patients:filter:gender=" . urlencode($_GET['gender']);
-    }
+    // Build dynamic, sorted cache key automatically
+    $cacheKey = generateFilteredCacheKey('patients', ['gender', 'age']);
 
     serveFromCacheIfAvailable($cacheKey, "Patients fetched successfully");
 
@@ -72,6 +88,8 @@ function handleUpdatePatient($conn) {
     if (empty($data)) {
         response(HttpStatus('BAD_REQUEST'), "No fields provided for update");
     }
+
+    validatePatientData($data);
 
     $updateData = [
         'name' => $data['name'] ?? $patient['name'],

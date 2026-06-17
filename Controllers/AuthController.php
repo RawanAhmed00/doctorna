@@ -8,6 +8,21 @@ require_once __DIR__ .'/../helper/request.php';
 require_once __DIR__ .'/../helper/mailer.php';
 require_once __DIR__ .'/../helper/cache.php';
 
+// ==========================================
+// VALIDATION HELPERS
+// ==========================================
+function validateAuthEmail($email) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid email format. Please enter a valid one.");
+    }
+}
+
+function validatePasswordStrength($pass) {
+    if (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#?!@$%^&*-]).{8,}$/", $pass)) {
+        response(HttpStatus('BAD_REQUEST'), "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+    }
+}
+
 //1. repo which has function of getting user by email is done
 //then check mail,pass
 function handleLogin($conn){
@@ -15,10 +30,7 @@ function handleLogin($conn){
     $email = $data['email'];
     $pass = $data['password'];
     
-    //make sure of email format:
-    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-        response(HttpStatus('BAD_REQUEST'), "Invalid Email Format, Please enter a valid one");
-    }
+    validateAuthEmail($email);
     
     //8er kda:el mail sa7 so: get all mails from the function that gets all mails
     $user = getUserByEmail($conn, $email);
@@ -57,20 +69,10 @@ function handleRegister($conn){
         response(HttpStatus('BAD_REQUEST'),"Please, Fill in all required fields !");
      }
         
-    //make sure of email format:
-    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-        response(HttpStatus('BAD_REQUEST'), "Invalid email format !");
-    }
+    validateAuthEmail($email);
+    validatePasswordStrength($pass);
 
     if (!is_numeric($age) || $age <= 0 || $age > 120) {
-        response(HttpStatus('BAD_REQUEST'), "Age must be a valid positive number !");
-    }
-
-    if (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#?!@$%^&*-]).{8,}$/", $pass)) {
-        response(HttpStatus('BAD_REQUEST'), "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
-    }
-
-    if (!in_array($gender, ['male', 'female'])) {
         response(HttpStatus('BAD_REQUEST'), "Gender must be either 'male' or 'female' !");
     }
     
@@ -93,9 +95,7 @@ function handleForgotPassword($conn){
     $data = getJsonInput(['email']);
     $email = $data['email'] ?? '';
 
-    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-        response(HttpStatus('BAD_REQUEST'), "Invalid email format !");
-    }
+    validateAuthEmail($email);
 
     $user = getUserByEmail($conn, $email);
     if(!$user){
@@ -134,9 +134,7 @@ function handleResetPassword($conn){
         response(HttpStatus('UNAUTHORIZED'), "Invalid token.");
     }
 
-    if (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#?!@$%^&*-]).{8,}$/", $new_password)) {
-        response(HttpStatus('BAD_REQUEST'), "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
-    }
+    validatePasswordStrength($new_password);
 
     $hashedPassword = password_hash($new_password, PASSWORD_DEFAULT);
     updateUserPassword($conn, $email, $hashedPassword);

@@ -7,6 +7,23 @@ require_once __DIR__ . '/../helper/request.php';
 require_once __DIR__ . '/../helper/cache.php';
 require_once __DIR__ . '/../helper/JWT.php';
 
+// ==========================================
+// VALIDATION HELPERS
+// ==========================================
+function validateSpecialityData($conn, $name, $currentName = null) {
+    if (trim($name) === '') {
+        response(HttpStatus('BAD_REQUEST'), "Speciality name cannot be empty");
+    }
+
+    // Check for duplicate name if it's a new name
+    if ($currentName === null || strtolower($name) !== strtolower($currentName)) {
+        $existing = getSpecialityByName($conn, $name);
+        if ($existing) {
+            response(HttpStatus('CONFLICT'), "Speciality with this name already exists");
+        }
+    }
+}
+
 function getSpeciality($conn, $id) {
     // Check if include_doctors query param is present and truthy
     $includeCount = isset($_GET['include_doctors']) && $_GET['include_doctors'] == '1';
@@ -32,11 +49,8 @@ function clearSpecialityCache($id = null) {
 }
 
 function handleGetAllSpecialities($conn) {
-    $cacheKey = "specialities:all";
-    // If filtering by name
-    if (isset($_GET['name'])) {
-        $cacheKey = "specialities:filter:name=" . urlencode($_GET['name']);
-    }
+    // Build dynamic, sorted cache key automatically
+    $cacheKey = generateFilteredCacheKey('specialities', ['name']);
 
     serveFromCacheIfAvailable($cacheKey, "Specialities fetched successfully");
 
@@ -72,11 +86,7 @@ function handleCreateSpeciality($conn) {
     
     $data = getJsonInput(['name', 'description']);
     
-    // Check duplicate
-    $existing = getSpecialityByName($conn, $data['name']);
-    if ($existing) {
-        response(HttpStatus('CONFLICT'), "Speciality with this name already exists");
-    }
+    validateSpecialityData($conn, $data['name']);
 
     $newSpeciality = createSpeciality($conn, $data);
     
@@ -100,12 +110,8 @@ function handleUpdateSpeciality($conn) {
         'description' => $data['description'] ?? $speciality['description']
     ];
 
-    // Check duplicate name on update
-    if (isset($data['name']) && strtolower($data['name']) !== strtolower($speciality['name'])) {
-        $existing = getSpecialityByName($conn, $data['name']);
-        if ($existing) {
-            response(HttpStatus('CONFLICT'), "Speciality with this name already exists");
-        }
+    if (isset($data['name'])) {
+        validateSpecialityData($conn, $data['name'], $speciality['name']);
     }
 
     $updatedSpeciality = updateSpeciality($conn, $id, $updateData);

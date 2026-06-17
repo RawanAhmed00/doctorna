@@ -77,3 +77,20 @@ function deleteResetToken($email) {
         error_log("Redis Cache Error: " . $e->getMessage());
     }
 }
+
+function generateFilteredCacheKey(string $prefix, array $allowedFilters): string {
+    $filterParams = [];
+    
+    foreach ($allowedFilters as $key) {
+        if (isset($_GET[$key]) && $_GET[$key] !== '') {
+            $filterParams[$key] = $_GET[$key];
+        }
+    }
+    
+    if (!empty($filterParams)) {
+        ksort($filterParams);
+        return $prefix . ':filter:' . http_build_query($filterParams);
+    }
+    
+    return $prefix . ':all';
+}

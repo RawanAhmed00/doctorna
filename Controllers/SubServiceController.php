@@ -7,6 +7,18 @@ require_once __DIR__ . '/../helper/request.php';
 require_once __DIR__ . '/../helper/JWT.php';
 require_once __DIR__ . '/../helper/cache.php';
 
+// ==========================================
+// VALIDATION HELPERS
+// ==========================================
+function validateSubServiceData($data) {
+    if (isset($data['name']) && strlen($data['name']) > 15) {
+        response(HttpStatus('BAD_REQUEST'), "Name must not exceed 15 characters");
+    }
+    if (isset($data['fees']) && (!is_numeric($data['fees']) || $data['fees'] < 0)) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid fees value");
+    }
+}
+
 function getSubService($conn, $id) {
     $subService = getSubServiceById($conn, $id);
     if (!$subService) {
@@ -27,10 +39,11 @@ function clearSubServiceCache($id = null) {
 }
 
 function handleGetAllSubServices($conn) {
-    $cacheKey = "subservices:all";
-    if (isset($_GET['name'])) {
-        $cacheKey = "subservices:filter:name=" . urlencode($_GET['name']);
-    }
+    // Reuse validation guard for filter parameters
+    validateSubServiceData($_GET);
+
+    // Build dynamic, sorted cache key automatically
+    $cacheKey = generateFilteredCacheKey('subservices', ['name', 'fees']);
 
     serveFromCacheIfAvailable($cacheKey, "SubServices fetched successfully");
     $data = getAllSubServices($conn);
@@ -60,12 +73,7 @@ function handleCreateSubService($conn) {
     checkAdminPrivileges();
     
     $data = getJsonInput(['name', 'fees', 'description']);
-    if (strlen($data['name']) > 15) {
-        response(HttpStatus('BAD_REQUEST'), "Name must not exceed 15 characters");
-    }
-    if (!is_numeric($data['fees']) || $data['fees'] < 0) {
-        response(HttpStatus('BAD_REQUEST'), "Invalid fees value");
-    }
+    validateSubServiceData($data);
 
     $new = createSubService($conn, $data);
     clearSubServiceCache();
@@ -89,12 +97,7 @@ function handleUpdateSubService($conn) {
         'description' => $data['description'] ?? $subService['description']
     ];
 
-    if (strlen($updateData['name']) > 15) {
-        response(HttpStatus('BAD_REQUEST'), "Name must not exceed 15 characters");
-    }
-    if (!is_numeric($updateData['fees']) || $updateData['fees'] < 0) {
-        response(HttpStatus('BAD_REQUEST'), "Invalid fees value");
-    }
+    validateSubServiceData($updateData);
 
     $updated = updateSubService($conn, $id, $updateData);
     clearSubServiceCache($id);
