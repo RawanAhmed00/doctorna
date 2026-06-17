@@ -1,65 +1,39 @@
 <?php
 
-function updatePatientRepo($conn, $id, $data) {
-    $fields = [];
-    $values = [];
-    
-    if (isset($data['name'])) {
-        $fields[] = "name = ?";
-        $values[] = $data['name'];
-    }
-    if (isset($data['email'])) {
-        $fields[] = "email = ?";
-        $values[] = $data['email'];
-    }
-    if (isset($data['password'])) {
-        $fields[] = "password = ?";
-        $values[] = $data['password'];
-    }
-    if (isset($data['age'])) {
-        $fields[] = "age = ?";
-        $values[] = $data['age'];
-    }
-    if (isset($data['gender'])) {
-        $fields[] = "gender = ?";
-        $values[] = $data['gender'];
-    }
-    if (isset($data['phone'])) {
-        $fields[] = "phone = ?";
-        $values[] = $data['phone'];
-    }
-    if (isset($data['role'])) {
-        $fields[] = "role = ?";
-        $values[] = $data['role'];
-    }
-    if (isset($data['deleted_at'])) {
-        $fields[] = "deleted_at = ?";
-        $values[] = $data['deleted_at'];
-    }
+require_once __DIR__ . '/../helper/db.php';
+require_once __DIR__ . '/../helper/filtration.php';
 
+function getAllPatients($conn) {
+    // Only return users with role='user'. Hide soft-deleted.
+    $sql = "SELECT id, name, email, age, gender, phone, role FROM users WHERE role = 'user' AND deleted_at IS NULL";
     
-    if (empty($fields)) {
-        return getPatientByIdRepo($conn, $id);
-    }
+    // Dynamic filtering for Admin (e.g. ?gender=male)
+    $filtered = applyFilters($sql, ['gender', 'age']);
+    $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
     
-    $values[] = $id;
-    $query = "UPDATE users SET " . implode(", ", $fields) . " WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->execute($values);
-    
-    return getPatientByIdRepo($conn, $id);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function deletePatientRepo($conn, $id) {
-    $query = "DELETE FROM users WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    return $stmt->execute([$id]);
-}
-
-function getPatientByIdRepo($conn, $id) {
-    $query = "SELECT * FROM users WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->execute([$id]);
+function getPatientById($conn, $id) {
+    $sql = "SELECT id, name, email, age, gender, phone, role FROM users WHERE id = :id AND role = 'user' AND deleted_at IS NULL";
+    $stmt = runQuery($conn, $sql, ['id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function updatePatient($conn, $id, $data) {
+    $sql = "UPDATE users SET name = :name, email = :email, age = :age, gender = :gender, phone = :phone WHERE id = :id AND role = 'user' AND deleted_at IS NULL";
+    runQuery($conn, $sql, [
+        'id' => $id,
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'age' => $data['age'],
+        'gender' => $data['gender'],
+        'phone' => $data['phone']
+    ]);
+    return getPatientById($conn, $id);
+}
+
+function softDeletePatient($conn, $id) {
+    $sql = "UPDATE users SET deleted_at = NOW() WHERE id = :id AND role = 'user' AND deleted_at IS NULL";
+    runQuery($conn, $sql, ['id' => $id]);
+}

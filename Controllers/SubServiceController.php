@@ -1,69 +1,113 @@
 <?php
 
+require_once __DIR__ . '/../repos/SubServiceRepo.php';
 require_once __DIR__ . '/../helper/response.php';
+require_once __DIR__ . '/../helper/status.php';
 require_once __DIR__ . '/../helper/request.php';
 require_once __DIR__ . '/../helper/JWT.php';
 require_once __DIR__ . '/../helper/cache.php';
-require_once __DIR__ . '/../repos/SubServiceRepo.php';
 
+function getSubService($conn, $id) {
+    $subService = getSubServiceById($conn, $id);
+    if (!$subService) {
+        response(HttpStatus('NOT_FOUND'), "SubService not found");
+    }
+    return $subService;
+}
 
-function getAllSubServicesHandler($conn) {
-    VerifyToken();
+function clearSubServiceCache($id = null) {
+    global $redis;
+    $keysToDelete = $redis->keys('subservices:*');
+    if ($id) {
+        $keysToDelete[] = 'subservice:' . $id;
+    }
+    if (!empty($keysToDelete)) {
+        deleteFromCache($keysToDelete);
+    }
+}
 
-    $cacheKey = 'subservices:all';
+function handleGetAllSubServices($conn) {
+    $cacheKey = "subservices:all";
+    if (isset($_GET['name'])) {
+        $cacheKey = "subservices:filter:name=" . urlencode($_GET['name']);
+    }
 
-    serveFromCacheIfAvailable($cacheKey, "Sub services fetched successfully");
-
+    serveFromCacheIfAvailable($cacheKey, "SubServices fetched successfully");
     $data = getAllSubServices($conn);
-
     saveToCache($cacheKey, $data);
 
-    response(200, "Sub services fetched successfully", [
+    response(HttpStatus('OK'), "SubServices fetched successfully", [
         'source' => 'database',
         'data' => $data
     ]);
 }
 
+function handleGetSubServiceById($conn) {
+    $id = getRequiredId();
+    $cacheKey = "subservice:" . $id;
 
-function getSubServiceByIdHandler($conn, $id) {
-    VerifyToken();
-
-    $cacheKey = "subservices:$id";
-
-    serveFromCacheIfAvailable($cacheKey, "Sub service fetched successfully");
-
-    $data = getSubServiceById($conn, $id);
-
-    if (!$data) {
-        response(404, "Sub service not found");
-    }
-
+    serveFromCacheIfAvailable($cacheKey, "SubService fetched successfully");
+    $data = getSubService($conn, $id);
     saveToCache($cacheKey, $data);
 
-    response(200, "Sub service fetched successfully", [
+    response(HttpStatus('OK'), "SubService fetched successfully", [
         'source' => 'database',
         'data' => $data
     ]);
 }
 
-
-function createSubServiceHandler($conn) {
-    $verifiedToken = VerifyToken();
-    require_admin($verifiedToken);
-
+function handleCreateSubService($conn) {
+    checkAdminPrivileges();
+    
     $data = getJsonInput(['name', 'fees', 'description']);
-
     if (strlen($data['name']) > 15) {
-        response(400, "Name must not exceed 15 characters");
+        response(HttpStatus('BAD_REQUEST'), "Name must not exceed 15 characters");
     }
-
     if (!is_numeric($data['fees']) || $data['fees'] < 0) {
-        response(400, "Invalid fees value");
+        response(HttpStatus('BAD_REQUEST'), "Invalid fees value");
     }
 
     $new = createSubService($conn, $data);
+    clearSubServiceCache();
+    response(HttpStatus('CREATED'), "SubService created successfully", $new);
+}
 
-    deleteFromCache('subservices:all');
+function handleUpdateSubService($conn) {
+    checkAdminPrivileges();
 
-    response(201, "Sub service created successfully", $new);
+    $id = getRequiredId();
+    $subService = getSubService($conn, $id);
+
+    $data = getJsonInput();
+    if (empty($data)) {
+        response(HttpStatus('BAD_REQUEST'), "No fields provided for update");
+    }
+
+    $updateData = [
+        'name' => $data['name'] ?? $subService['name'],
+        'fees' => $data['fees'] ?? $subService['fees'],
+        'description' => $data['description'] ?? $subService['description']
+    ];
+
+    if (strlen($updateData['name']) > 15) {
+        response(HttpStatus('BAD_REQUEST'), "Name must not exceed 15 characters");
+    }
+    if (!is_numeric($updateData['fees']) || $updateData['fees'] < 0) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid fees value");
+    }
+
+    $updated = updateSubService($conn, $id, $updateData);
+    clearSubServiceCache($id);
+    response(HttpStatus('OK'), "SubService updated successfully", $updated);
+}
+
+function handleDeleteSubService($conn) {
+    checkAdminPrivileges();
+
+    $id = getRequiredId();
+    getSubService($conn, $id);
+
+    softDeleteSubService($conn, $id);
+    clearSubServiceCache($id);
+    response(HttpStatus('OK'), "SubService deleted successfully");
 }

@@ -464,7 +464,7 @@
             "name": "4. Patients",
             "item": [
                 {
-                    "name": "Get All Patients (Admin)",
+                    "name": "Get All / Filter Patients (Admin)",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -486,6 +486,20 @@
                             "path": [
                                 "PatientRoute.php",
                                 "patients"
+                            ],
+                            "query": [
+                                {
+                                    "key": "gender",
+                                    "value": "male",
+                                    "disabled": true,
+                                    "description": "Optional: Filter by gender"
+                                },
+                                {
+                                    "key": "age",
+                                    "value": "25",
+                                    "disabled": true,
+                                    "description": "Optional: Filter by exact age"
+                                }
                             ]
                         }
                     }
@@ -522,106 +536,9 @@
                             ]
                         }
                     }
-                }
-            ]
-        },
-        {
-            "name": "5. Specialities",
-            "item": [
-                {
-                    "name": "Get All / Filter Specialities",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/SpecialityRoute.php/specialities",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "SpecialityRoute.php",
-                                "specialities"
-                            ],
-                            "query": [
-                                {
-                                    "key": "name",
-                                    "value": "Dentist",
-                                    "disabled": true,
-                                    "description": "Optional: Filter exactly by name"
-                                }
-                            ]
-                        },
-                        "description": "Check 'Params' tab to toggle optional filtering."
-                    }
                 },
                 {
-                    "name": "Get Speciality by ID (Public)",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/SpecialityRoute.php/specialities?id=1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "SpecialityRoute.php",
-                                "specialities"
-                            ],
-                            "query": [
-                                {
-                                    "key": "id",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "include_doctors",
-                                    "value": "1",
-                                    "disabled": true,
-                                    "description": "Optional: Set to 1 to include doctors_count"
-                                }
-                            ]
-                        },
-                        "description": "Check 'Params' tab to toggle the include_doctors flag."
-                    }
-                },
-                {
-                    "name": "Create Speciality (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{admin_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Cardiology\",\n    \"description\": \"Heart specialists.\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/SpecialityRoute.php/specialities",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "SpecialityRoute.php",
-                                "specialities"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Update Speciality (Admin)",
+                    "name": "Update Patient (Admin)",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -637,7 +554,7 @@
                         "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"description\": \"Updated description.\"\n}",
+                            "raw": "{\n    \"phone\": \"01099998888\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -645,13 +562,13 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/SpecialityRoute.php/specialities?id=1",
+                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
-                                "SpecialityRoute.php",
-                                "specialities"
+                                "PatientRoute.php",
+                                "patients"
                             ],
                             "query": [
                                 {
@@ -663,7 +580,7 @@
                     }
                 },
                 {
-                    "name": "Delete Speciality (Admin)",
+                    "name": "Delete Patient (Admin)",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -678,13 +595,337 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/SpecialityRoute.php/specialities?id=1",
+                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
-                                "SpecialityRoute.php",
-                                "specialities"
+                                "PatientRoute.php",
+                                "patients"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Patients",
+            "item": [
+                {
+                    "name": "Get All / Filter Patients (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/PatientRoute.php/patients",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "PatientRoute.php",
+                                "patients"
+                            ],
+                            "query": [
+                                {
+                                    "key": "gender",
+                                    "value": "male",
+                                    "disabled": true,
+                                    "description": "Optional: Filter by gender"
+                                },
+                                {
+                                    "key": "age",
+                                    "value": "25",
+                                    "disabled": true,
+                                    "description": "Optional: Filter by exact age"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Patient by ID (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "PatientRoute.php",
+                                "patients"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Patient (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phone\": \"01099998888\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "PatientRoute.php",
+                                "patients"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Patient (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "PatientRoute.php",
+                                "patients"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6. SubServices",
+            "item": [
+                {
+                    "name": "Get All / Filter SubServices (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/SubServiceRoute.php/subservices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "SubServiceRoute.php",
+                                "subservices"
+                            ],
+                            "query": [
+                                {
+                                    "key": "name",
+                                    "value": "X-Ray",
+                                    "disabled": true,
+                                    "description": "Optional filter by name"
+                                },
+                                {
+                                    "key": "fees",
+                                    "value": "150",
+                                    "disabled": true,
+                                    "description": "Optional filter by fee amount"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get SubService by ID (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/SubServiceRoute.php/subservices?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "SubServiceRoute.php",
+                                "subservices"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create SubService (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"MRI Scan\",\n    \"fees\": 500,\n    \"description\": \"Full body scan\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/SubServiceRoute.php/subservices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "SubServiceRoute.php",
+                                "subservices"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update SubService (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"fees\": 450\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/SubServiceRoute.php/subservices?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "SubServiceRoute.php",
+                                "subservices"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete SubService (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/SubServiceRoute.php/subservices?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "SubServiceRoute.php",
+                                "subservices"
                             ],
                             "query": [
                                 {
