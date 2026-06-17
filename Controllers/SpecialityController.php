@@ -4,7 +4,10 @@
 
 require_once __DIR__ . '/../config/redis.php';
 require_once __DIR__ . '/../repos/SpecialityRepo.php';
-require_once __DIR__ .'/../helper/status.php';
+require_once __DIR__ .'/../helper/response.php';
+require_once __DIR__ .'/../helper/request.php';
+require_once __DIR__ .'/../helper/JWT.PHP';
+require_once __DIR__ .'/../helper/cache.PHP';
 
 // Cache keys
 define('CACHE_SPECIALITIES_ALL', 'specialities:all');
