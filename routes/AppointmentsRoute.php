@@ -14,7 +14,16 @@ if (strtolower($module) === "appointments" || strtolower($module) === "appointme
         case "GET":
             if (isset($_GET['id'])) {
                 handleGetAppointmentById($conn);
-            } else {
+            }elseif (isset($_GET['page'])){
+                $paginatedData = paginateTable($conn, 'appointments', 10);
+                if (empty($paginatedData['list'])) {
+                    response(HttpStatus('NOT_FOUND'), "No Appointments found", $paginatedData);
+                    return;
+                }
+           
+                response(HttpStatus('OK'), "Appointments fetched successfully", $paginatedData);
+            }
+            else {
                 handleGetAllAppointments($conn);
             }
             break;

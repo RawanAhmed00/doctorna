@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../helper/status.php';
 require_once __DIR__ . '/../helper/response.php';
 require_once __DIR__ . '/../Controllers/DoctorController.php';
+require_once __DIR__ . '/../helper/pagination.php';
 
 $module = basename(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH));
 $method = $_SERVER["REQUEST_METHOD"];
@@ -14,7 +15,16 @@ if ($module === "doctors") {
         case "GET":
             if (isset($_GET['id'])) {
                 handleGetDoctorById($conn);
-            } else {
+            }
+            elseif (isset($_GET['page'])){
+                $paginatedData = paginateTable($conn, 'doctors', 10);
+                if (empty($paginatedData['list'])) {
+                    response(HttpStatus('NOT_FOUND'), "No Doctors found", $paginatedData);
+                    return;
+                }
+                response(HttpStatus('OK'), "Doctors fetched successfully", $paginatedData);
+            }
+            else {
                 handleGetAllDoctors($conn);
             }
             break;

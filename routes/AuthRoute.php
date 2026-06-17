@@ -11,7 +11,7 @@ $action = basename($uri);
 $module = basename(dirname($uri));      
 
 $method = $_SERVER["REQUEST_METHOD"];
-
+//NO GET HERE, MAIN USER IS PATIENT, SO CAN NOT GET, ONLY LOGIN, REGISTER
 if ($module === 'auth') {
     if ($method !== 'POST') {
         methodNotAllowed();

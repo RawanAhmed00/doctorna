@@ -5,6 +5,7 @@ require_once __DIR__ . '/../helper/response.php';
 require_once __DIR__ . '/../helper/status.php';
 require_once __DIR__ . '/../helper/request.php';
 require_once __DIR__ . '/../helper/JWT.php';
+require_once __DIR__ . '/../helper/pagination.php';
 
 function getAppointment($conn, $id) {
     $appointment = getAppointmentById($conn, $id);
@@ -114,4 +115,17 @@ function handleUpdateAppointment($conn) {
 
     $updatedAppointment = updateAppointment($conn, $id, $updateData);
     response(HttpStatus('OK'), "Appointment updated successfully", $updatedAppointment);
+}
+
+function getAllSpecialitiesController($conn) {
+
+
+    $result = paginateTable($conn, 'appointments', 10);
+
+    if (empty($result['list'])) {
+        response(HttpStatus('NOT_FOUND'), "No appointments found", $result);
+        return;
+    }
+
+    response(HttpStatus('OK'), "Appointment retrieved successfully", $result);
 }
