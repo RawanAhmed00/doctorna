@@ -3,7 +3,8 @@
 // Handles HTTP requests for Speciality module
 
 require_once __DIR__ . '/../config/redis.php';
-require_once __DIR__ . '/../repositories/SpecialityRepository.php';
+require_once __DIR__ . '/../repos/SpecialityRepo.php';
+require_once __DIR__ .'/../helper/status.php';
 
 // Cache keys
 define('CACHE_SPECIALITIES_ALL', 'specialities:all');
@@ -19,20 +20,22 @@ function getAllSpecialitiesController($conn) {
     
     if ($cachedData !== false) {
         // Cache hit → return cached data
-        response(200, "Specialities retrieved from cache", json_decode($cachedData, true));
+        //response(200, "Specialities retrieved from cache", json_decode($cachedData, true));
+        response(HttpStatus('OK'),"Specialities retrieved from cache", json_decode($cachedData, true));
     }
     
     // 2. Cache miss → Query database
     $specialities = getAllSpecialities($conn);
     
     if (empty($specialities)) {
-        response(404, "No specialities found");
+        //response(404, "No specialities found");
+        response(HttpStatus('NOT_FOUND'),"No specialities found");
     }
     
     // 3. Store result in Redis with TTL
     $redis->setex($cacheKey, CACHE_TTL_SPECIALITIES, json_encode($specialities));
-    
-    response(200, "Specialities retrieved successfully", $specialities);
+    response(HttpStatus('OK'),"Specialities retrieved successfully",$specialities);
+    //response(200, "Specialities retrieved successfully", $specialities);
 }
 
 function getSpecialityByIdController($conn, $id) {
@@ -40,7 +43,8 @@ function getSpecialityByIdController($conn, $id) {
     
     // Validate ID
     if (!is_numeric($id) || $id <= 0) {
-        response(400, "Invalid speciality ID");
+        //response(400, "Invalid speciality ID");
+        respons(HttpStatus('BAD_REQUEST'),"Invalid speciality ID");
     }
     
     // 1. Check cache first (Cache-Aside pattern)
@@ -49,45 +53,53 @@ function getSpecialityByIdController($conn, $id) {
     
     if ($cachedData !== false) {
         // Cache hit → return cached data
-        response(200, "Speciality retrieved from cache", json_decode($cachedData, true));
+        //response(200, "Speciality retrieved from cache", json_decode($cachedData, true));
+        response(HttpStatus('OK'),"Speciality retrieved from cache",json_decode($cachedData, true));
     }
     
     // 2. Cache miss → Query database
     $speciality = getSpecialityById($conn, $id);
     
     if (!$speciality) {
-        response(404, "Speciality not found");
+        //response(404, "Speciality not found");
+        response(HttpStatus('NOT_FOUND'),"Speciality not found");
     }
     
     // 3. Store result in Redis with TTL
     $redis->setex($cacheKey, CACHE_TTL_SPECIALITIES, json_encode($speciality));
-    
-    response(200, "Speciality retrieved successfully", $speciality);
+    response(HttpStatus('OK'),"Speciality retrieved successfully",$speciality);
+   // response(200, "Speciality retrieved successfully", $speciality);
 }
-
+//Only admin has access to this action
 function createSpecialityController($conn) {
     global $redis;
-    
+    $verifiedToken=VerifyToken();
     // Require admin access
-    require_admin();
+    require_admin($verifiedToken);
     
     // Get input from request body
     $input = json_decode(file_get_contents('php://input'), true);
     
     if (!$input) {
-        response(400, "Invalid input format. JSON expected.");
+       // response(400, "Invalid input format. JSON expected.");
+        respons(HttpStatus('BAD_REQUEST'),"Invalid input format. JSON expected.");
+    
     }
     
     // Validate required fields
+    //Trim(): cleaning, trimming input from spaces,(left and right not middle!)
     $name = trim($input['name'] ?? '');
     $description = trim($input['description'] ?? '');
     
     if (empty($name)) {
-        response(400, "Speciality name is required");
+        //response(400, "Speciality name is required");
+        respons(HttpStatus('BAD_REQUEST'),"Speciality name is required");
     }
     
     if (empty($description)) {
-        response(400, "Speciality description is required");
+        //response(400, "Speciality description is required");
+        respons(HttpStatus('BAD_REQUEST'),"Speciality description is required");
+
     }
     
     // Check if speciality already exists
@@ -120,26 +132,29 @@ function createSpecialityController($conn) {
 
 function updateSpecialityController($conn, $id) {
     global $redis;
-    
+    $verifiedToken=VerifyToken();
     // Require admin access
-    require_admin();
+    require_admin($verifiedToken);
     
     // Validate ID
     if (!is_numeric($id) || $id <= 0) {
-        response(400, "Invalid speciality ID");
+        //response(400, "Invalid speciality ID");
+        response(HttpStatus('OK'),"Invalid speciality ID");
     }
     
     // Check if speciality exists
     $existing = getSpecialityById($conn, $id);
     if (!$existing) {
-        response(404, "Speciality not found");
+        //response(404, "Speciality not found");
+        response(HttpStatus('NOT_FOUND'),"Speciality not found");
     }
     
     // Get input from request body
     $input = json_decode(file_get_contents('php://input'), true);
     
     if (!$input) {
-        response(400, "Invalid input format. JSON expected.");
+        //response(400, "Invalid input format. JSON expected.");
+        response(HttpStatus('BAD_REQUEST'),"Invalid input format. JSON expected.");
     }
     
     // Validate required fields
@@ -147,11 +162,13 @@ function updateSpecialityController($conn, $id) {
     $description = trim($input['description'] ?? '');
     
     if (empty($name)) {
-        response(400, "Speciality name is required");
+        //response(400, "Speciality name is required");
+        respons(HttpStatus('BAD_REQUEST'),"Speciality name is required");
     }
     
     if (empty($description)) {
-        response(400, "Speciality description is required");
+        //response(400, "Speciality description is required");
+         respons(HttpStatus('BAD_REQUEST'),"Speciality description is required");
     }
     
     // Update speciality
@@ -168,24 +185,27 @@ function updateSpecialityController($conn, $id) {
     $redis->del(CACHE_SPECIALITIES_ALL);
     $redis->del(CACHE_SPECIALITY_BY_ID . $id);
     
-    response(200, "Speciality updated successfully", $updatedSpeciality);
+    //response(200, "Speciality updated successfully", $updatedSpeciality);
+    response(HttpStatus('OK'),"Speciality updated successfully", $updatedSpeciality);
 }
 
 function deleteSpecialityController($conn, $id) {
     global $redis;
-    
+    $verifiedToken=VerifyToken();
     // Require admin access
-    require_admin();
+    require_admin($verfiedToken);
     
     // Validate ID
     if (!is_numeric($id) || $id <= 0) {
-        response(400, "Invalid speciality ID");
+        //response(400, "Invalid speciality ID");
+        response(HttpStatus('BAD_REQUEST'),"Invalid speciality ID");
     }
     
     // Check if speciality exists
     $existing = getSpecialityById($conn, $id);
     if (!$existing) {
-        response(404, "Speciality not found");
+        //response(404, "Speciality not found");
+        respons(HttpStatus('NOT_FOUND'),"Speciality not found");
     }
     
     // Soft delete speciality
@@ -199,16 +219,12 @@ function deleteSpecialityController($conn, $id) {
     $redis->del(CACHE_SPECIALITIES_ALL);
     $redis->del(CACHE_SPECIALITY_BY_ID . $id);
     
-    response(200, "Speciality deleted successfully");
+    //response(200, "Speciality deleted successfully");
+    response(HttpStatus('OK'),"Speciality deleted successfully");
 }
 
-// Additional helper function for checking duplicates
-function getSpecialityByName($conn, $name) {
-    $query = "SELECT * FROM speciality WHERE name = ? AND deleted_at IS NULL";
-    $stmt = $conn->prepare($query);
-    $stmt->execute([$name]);
-    return $stmt->fetch();
-}
+
+
 ?>
 
 
