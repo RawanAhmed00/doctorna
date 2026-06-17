@@ -1,10 +1,18 @@
 <?php
 
 require_once __DIR__ . '/../helper/db.php';
+require_once __DIR__ . '/../helper/filtration.php';
 
-function getAllDoctors($conn) {
+function getAllDoctors($conn, $requestType = 'all') {
     $sql = "SELECT * FROM doctors WHERE deleted_at IS NULL";
-    $stmt = runQuery($conn, $sql);
+    
+    if ($requestType === 'filter') {
+        $filtered = applyFilters($sql, ['gender', 'rank', 'is_available']);
+        $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
+    } else {
+        $stmt = runQuery($conn, $sql);
+    }
+    
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 

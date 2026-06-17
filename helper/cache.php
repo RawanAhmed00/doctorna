@@ -5,7 +5,6 @@ require_once __DIR__ . '/status.php';
 require_once __DIR__ . '/response.php';
 
 use Predis\Client;
-use Exception; // Import base Exception class
 
 $redis = new Client([
     'scheme' => 'tcp',

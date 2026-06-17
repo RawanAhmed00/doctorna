@@ -1,341 +1,589 @@
 {
-	"info": {
-		"_postman_id": "b3f3b90f-0c53-4873-a178-5a2a2202611a",
-		"name": "Doctorna API - Auth & Doctor Modules",
-		"description": "Complete Postman collection for the Doctorna REST API containing Auth and Doctor endpoints.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Auth Module",
-			"item": [
-				{
-					"name": "Register User",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Ahmed Tyson\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"StrongPass#2026\",\n    \"age\": 25,\n    \"gender\": \"male\",\n    \"phone\": \"01012345678\",\n    \"role\": \"user\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/AuthRoute.php/auth/register",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"AuthRoute.php",
-								"auth",
-								"register"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"StrongPass#2026\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/AuthRoute.php/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"AuthRoute.php",
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Forgot Password",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"testuser@example.com\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/AuthRoute.php/auth/forgot-password",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"AuthRoute.php",
-								"auth",
-								"forgot-password"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Reset Password",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"token\": \"<PASTE_TOKEN_FROM_EMAIL>\",\n    \"new_password\": \"NewStrongPass#2026\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/AuthRoute.php/auth/reset-password",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"AuthRoute.php",
-								"auth",
-								"reset-password"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Doctor Module",
-			"item": [
-				{
-					"name": "Get All Doctors",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/DoctorRoute.php/doctors",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"DoctorRoute.php",
-								"doctors"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Doctor By ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"DoctorRoute.php",
-								"doctors"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Doctor (Admin)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Dr. Jane Doe\",\n    \"email\": \"janedoe@doctorna.com\",\n    \"rank\": \"specialist\",\n    \"gender\": \"female\",\n    \"spec_id\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/DoctorRoute.php/doctors",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"DoctorRoute.php",
-								"doctors"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Doctor - Full (Admin)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Dr. Jane Doe\",\n    \"email\": \"janedoe@doctorna.com\",\n    \"rank\": \"consultant\",\n    \"gender\": \"female\",\n    \"is_available\": 0,\n    \"spec_id\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"DoctorRoute.php",
-								"doctors"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Patch Doctor - Partial (Admin)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"is_available\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"DoctorRoute.php",
-								"doctors"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Doctor (Admin)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"DoctorRoute.php",
-								"doctors"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost/threedos-backend/tasks/task-06/doctorna/routes"
-		},
-		{
-			"key": "admin_token",
-			"value": "your_admin_jwt_token_here"
-		}
-	]
+    "info": {
+        "name": "Doctorna API v2 (Complete Integration)",
+        "description": "Complete Postman collection for Doctorna system. Includes Auth, Doctors, and Appointments modules. \n\n**Roles:**\n- **Public**: No token required.\n- **User**: Requires {{user_token}}.\n- **Admin**: Requires {{admin_token}}.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Authentication",
+            "description": "Endpoints for user registration, login, and password recovery.",
+            "item": [
+                {
+                    "name": "Register (Public)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Ahmed User\",\n    \"email\": \"ahmed@example.com\",\n    \"password\": \"StrongPass123!\",\n    \"age\": 25,\n    \"gender\": \"male\",\n    \"phone\": \"01012345678\",\n    \"role\": \"user\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/AuthRoute.php/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AuthRoute.php",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user. Role must be 'user'. Password requires upper, lower, number, and special char."
+                    }
+                },
+                {
+                    "name": "Login (Public)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"ahmed@example.com\",\n    \"password\": \"StrongPass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/AuthRoute.php/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AuthRoute.php",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login to receive your JWT token. Copy the token to collection variables (user_token or admin_token)."
+                    }
+                },
+                {
+                    "name": "Forgot Password (Public)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"ahmed@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/AuthRoute.php/auth/forgot-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AuthRoute.php",
+                                "auth",
+                                "forgot-password"
+                            ]
+                        },
+                        "description": "Generates a reset token and sends it via email (simulated)."
+                    }
+                },
+                {
+                    "name": "Reset Password (Public)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"ahmed@example.com\",\n    \"token\": \"PASTE_TOKEN_HERE\",\n    \"new_password\": \"NewStrongPass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/AuthRoute.php/auth/reset-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AuthRoute.php",
+                                "auth",
+                                "reset-password"
+                            ]
+                        },
+                        "description": "Reset password using the token sent to your email."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Doctors",
+            "description": "Endpoints for browsing and managing doctors. Browsing is public, management is Admin only.",
+            "item": [
+                {
+                    "name": "Get All Doctors (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-Request-Type",
+                                "value": "all",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/DoctorRoute.php/doctors",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "DoctorRoute.php",
+                                "doctors"
+                            ]
+                        },
+                        "description": "Fetch all active doctors. Uses Redis cache `doctors:all`."
+                    }
+                },
+                {
+                    "name": "Filter Doctors (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-Request-Type",
+                                "value": "filter",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/DoctorRoute.php/doctors?gender=female&rank=specialist&is_available=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "DoctorRoute.php",
+                                "doctors"
+                            ],
+                            "query": [
+                                {
+                                    "key": "gender",
+                                    "value": "female",
+                                    "description": "male or female"
+                                },
+                                {
+                                    "key": "rank",
+                                    "value": "specialist",
+                                    "description": "intern, resident, specialist, etc."
+                                },
+                                {
+                                    "key": "is_available",
+                                    "value": "1",
+                                    "description": "0 or 1"
+                                }
+                            ]
+                        },
+                        "description": "Filter doctors dynamically. **Requires `X-Request-Type: filter` header.** Creates unique Redis cache per filter combo."
+                    }
+                },
+                {
+                    "name": "Get Doctor by ID (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "DoctorRoute.php",
+                                "doctors"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "description": "Get a single doctor's details."
+                    }
+                },
+                {
+                    "name": "Create Doctor (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Dr. Jane Doe\",\n    \"email\": \"janedoe@doctorna.com\",\n    \"rank\": \"consultant\",\n    \"gender\": \"female\",\n    \"spec_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/DoctorRoute.php/doctors",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "DoctorRoute.php",
+                                "doctors"
+                            ]
+                        },
+                        "description": "Add a new doctor to the system. Requires Admin JWT."
+                    }
+                },
+                {
+                    "name": "Update Doctor - Full (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Dr. Jane Doe\",\n    \"email\": \"janedoe@doctorna.com\",\n    \"rank\": \"consultant\",\n    \"gender\": \"female\",\n    \"is_available\": 0,\n    \"spec_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "DoctorRoute.php",
+                                "doctors"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "description": "Fully replace a doctor's record. Requires all fields."
+                    }
+                },
+                {
+                    "name": "Patch Doctor - Partial (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"is_available\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "DoctorRoute.php",
+                                "doctors"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "description": "Update specific fields of a doctor without providing the full object."
+                    }
+                },
+                {
+                    "name": "Delete Doctor (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "DoctorRoute.php",
+                                "doctors"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "description": "Soft delete a doctor. Clears all associated Redis caches."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Appointments",
+            "description": "Endpoints for booking and tracking appointments. Role-based isolation ensures users only see their own.",
+            "item": [
+                {
+                    "name": "Get All Appointments (User/Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{user_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AppointmentsRoute.php",
+                                "appointments"
+                            ]
+                        },
+                        "description": "Fetch appointments. **Users** receive only their own appointments. **Admins** receive all appointments across the system."
+                    }
+                },
+                {
+                    "name": "Filter Appointments (User/Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{user_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments?status=pending&date_time=2026-06-20",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AppointmentsRoute.php",
+                                "appointments"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "pending",
+                                    "description": "pending, confirmed, cancelled, completed"
+                                },
+                                {
+                                    "key": "date_time",
+                                    "value": "2026-06-20",
+                                    "description": "Format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS"
+                                },
+                                {
+                                    "key": "doc_id",
+                                    "value": "1",
+                                    "description": "Filter by Doctor ID"
+                                }
+                            ]
+                        },
+                        "description": "Filter your appointments dynamically. Automatically scopes to the authenticated user."
+                    }
+                },
+                {
+                    "name": "Get Appointment by ID (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AppointmentsRoute.php",
+                                "appointments"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "description": "Retrieve a specific appointment by ID. Restricted to Admins."
+                    }
+                },
+                {
+                    "name": "Create Appointment (User)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{user_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"pending\",\n    \"date_time\": \"2026-06-20 10:00:00\",\n    \"doc_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AppointmentsRoute.php",
+                                "appointments"
+                            ]
+                        },
+                        "description": "Book a new appointment. The `user_id` is securely extracted from your JWT token. Only users can perform this."
+                    }
+                },
+                {
+                    "name": "Update Appointment (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"confirmed\",\n    \"date_time\": \"2026-06-22 14:30:00\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "AppointmentsRoute.php",
+                                "appointments"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "description": "Change appointment details (e.g. confirming a booking). Partial updates allowed. Admin only."
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost/threedos-backend/tasks/task-06/doctorna/routes",
+            "type": "string"
+        },
+        {
+            "key": "admin_token",
+            "value": "YOUR_ADMIN_JWT_HERE",
+            "type": "string"
+        },
+        {
+            "key": "user_token",
+            "value": "YOUR_USER_JWT_HERE",
+            "type": "string"
+        }
+    ]
 }

@@ -1,21 +1,27 @@
 <?php
-require __DIR__ ."/../config/database.php";
-require __DIR__ ."/../controllers/AppointmentController.php";
 
-// Filtration 
-
-function GetFilter ($conn){
-
-$query ="select * from Appointments where 1=1";
-$bindings =[];
-
-if (!empty ($_GET["status"])){
-    $query.="And status =:status";
-    $bindings[":status"] =$_GET["status"];
-}
-
-if (!empty ($_GET ["date_time"])){
-    $query.="And date_time =:date_time";
-    $bindings [":date_time"] =$_GET ["date_time"];
-}
+function applyFilters(string $baseQuery, array $allowedFields, array $bindings = []): array {
+    $query = $baseQuery;
+    
+    foreach ($allowedFields as $field) {
+        // If query param exists and isn't empty
+        if (isset($_GET[$field]) && $_GET[$field] !== '') {
+            // Strip any table aliases (like 'd.status') to make a clean PDO parameter name
+            $paramName = str_replace('.', '_', $field);
+            
+            // If the field is a date/time column but only a date (YYYY-MM-DD) is provided, match the whole day
+            if (strpos($field, 'date') !== false && strlen($_GET[$field]) === 10) {
+                $query .= " AND DATE($field) = :$paramName";
+            } else {
+                $query .= " AND $field = :$paramName";
+            }
+            
+            $bindings[":$paramName"] = $_GET[$field];
+        }
+    }
+    
+    return [
+        'sql' => $query,
+        'bindings' => $bindings
+    ];
 }

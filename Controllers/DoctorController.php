@@ -39,19 +39,56 @@ function getDoctor($conn, $id) {
 }
 
 function clearDoctorCache($id = null) {
-    $keysToDelete = ['doctors:all'];
+    global $redis;
+    
+    // Find all list/filter cache keys
+    $keysToDelete = $redis->keys('doctors:*');
+    
     if ($id) {
         $keysToDelete[] = 'doctor:' . $id;
     }
-    deleteFromCache($keysToDelete);
+    
+    if (!empty($keysToDelete)) {
+        deleteFromCache($keysToDelete);
+    }
 }
 
-
 function handleGetAllDoctors($conn) {
-    $cacheKey = 'doctors:all';
+    // Get headers case-insensitively
+    $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+    $requestType = $headers['x-request-type'] ?? 'all';
+
+    if ($requestType === 'filter') {
+        // Validate filter values
+        if (isset($_GET['gender']) && !in_array(strtolower($_GET['gender']), ['male', 'female'])) {
+            response(HttpStatus('BAD_REQUEST'), "Invalid gender filter. Allowed: male, female");
+        }
+        if (isset($_GET['rank']) && !in_array(strtolower($_GET['rank']), ['intern', 'resident', 'specialist', 'senior specialist', 'consultant'])) {
+            response(HttpStatus('BAD_REQUEST'), "Invalid rank filter. Allowed: intern, resident, specialist, senior specialist, consultant");
+        }
+        if (isset($_GET['is_available']) && !in_array($_GET['is_available'], [0, 1, '0', '1'], true)) {
+            response(HttpStatus('BAD_REQUEST'), "Invalid is_available filter. Allowed: 0 or 1");
+        }
+
+        // Collect only allowed filters from GET parameters
+        $filterParams = [];
+        $allowed = ['gender', 'rank', 'is_available'];
+        
+        foreach ($allowed as $key) {
+            if (isset($_GET[$key])) {
+                $filterParams[$key] = $_GET[$key];
+            }
+        }
+        
+        ksort($filterParams); // Sort alphabetically for consistent cache key
+        $cacheKey = 'doctors:filter:' . http_build_query($filterParams);
+    } else {
+        $cacheKey = 'doctors:all';
+    }
+
     serveFromCacheIfAvailable($cacheKey, "Doctors fetched successfully");
 
-    $doctors = getAllDoctors($conn);
+    $doctors = getAllDoctors($conn, $requestType);
     saveToCache($cacheKey, $doctors);
 
     response(HttpStatus('OK'), "Doctors fetched successfully", [
