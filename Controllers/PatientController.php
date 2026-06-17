@@ -1,56 +1,50 @@
 <?php
-require_once __DIR__ . "/../helper/cache.php";
-require_once __DIR__ . "/../repos/PatientRepo.php";
-require_once __DIR__ . "/../helper/response.php";
 
-function GetUsers()
-{
-    global $redis;
-    $cacheKey = "users";
-    $cachedData = $redis->get($cacheKey);
+require_once __DIR__ . '/../repos/PatientRepo.php';
+require_once __DIR__ . '/../helper/response.php';
+require_once __DIR__ . '/../helper/status.php';
+require_once __DIR__ . '/../helper/request.php';
+require_once __DIR__ . '/../helper/cache.php';
+require_once __DIR__ . '/../helper/JWT.php';
 
-    if($cachedData)
-    {
-        response(
-            200,
-            "Success",
-            json_decode($cachedData, true)
-        );
-        return;
+function getPatient($conn, $id) {
+    $patient = getPatientById($conn, $id);
+    if (!$patient) {
+        response(HttpStatus('NOT_FOUND'), "Patient not found");
     }
-
-    $result = GetAllUsersRepo();
-
-    response(
-        200,
-        "Success",
-        $result
-    );
+    return $patient;
 }
 
-function GetUserById()
-{
-    $id = $_GET["id"] ?? null;
+function handleGetAllPatients($conn) {
+    $token = VerifyToken();
+    require_admin($token);
 
-    if(empty($id))
-    {
-        response(
-            422,
-            "User ID Is Required"
-        );
-    }
+    $cacheKey = "patients:all";
+    serveFromCacheIfAvailable($cacheKey, "Patients fetched successfully");
 
-    $result = GetUserByIdRepo(
-        $id
-    );
+    $patients = getAllPatients($conn);
+    saveToCache($cacheKey, $patients);
 
-    response(
-        200,
-        "Success",
-        $result
-    );
+    response(HttpStatus('OK'), "Patients fetched successfully", [
+        'source' => 'database',
+        'data' => $patients
+    ]);
 }
 
+function handleGetPatientById($conn) {
+    $token = VerifyToken();
+    require_admin($token);
 
+    $id = getRequiredId();
+    $cacheKey = "patient:" . $id;
 
+    serveFromCacheIfAvailable($cacheKey, "Patient fetched successfully");
 
+    $patient = getPatient($conn, $id);
+    saveToCache($cacheKey, $patient);
+
+    response(HttpStatus('OK'), "Patient fetched successfully", [
+        'source' => 'database',
+        'data' => $patient
+    ]);
+}

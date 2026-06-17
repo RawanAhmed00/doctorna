@@ -567,6 +567,74 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "4. Patients",
+            "description": "Endpoints for managing patients (users). Restricted to Admins.",
+            "item": [
+                {
+                    "name": "Get All Patients (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/PatientRoute.php/patients",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "PatientRoute.php",
+                                "patients"
+                            ]
+                        },
+                        "description": "Fetch all patients (users with role='user'). Secured for Admin access only. Uses Redis cache `patients:all`."
+                    }
+                },
+                {
+                    "name": "Get Patient by ID (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "PatientRoute.php",
+                                "patients"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "description": "Retrieve details for a specific patient by their ID. Secured for Admin access only."
+                    }
+                }
+            ]
         }
     ],
     "variable": [

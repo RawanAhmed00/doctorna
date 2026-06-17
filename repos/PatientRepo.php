@@ -1,37 +1,15 @@
 <?php
-require_once '../config/database.php';
-function GetAllUsersRepo()
-{
-    global $conn ;
-   $stmt = $conn->prepare("
-        SELECT *
-        FROM users
-    ");
+require_once __DIR__ . '/../helper/db.php';
 
-    $stmt->execute();
-
-    return 
-    $stmt->fetchAll(PDO::FETCH_ASSOC);
+function getAllPatients($conn) {
+    $sql = "SELECT id, name, email, age, gender, phone, role FROM users WHERE role = 'user'";
+    $stmt = runQuery($conn, $sql);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function GetUserByIdRepo($id)
-{
-    global $conn;
-    $stmt = $conn->prepare("
-        SELECT
-            id,
-            name,
-            email,
-            age,
-            gender,
-            phone,
-            role
-        FROM users
-        WHERE id = ?
-    ");
-
-    $stmt->execute([$id]);
-
+function getPatientById($conn, $id) {
+    $sql = "SELECT id, name, email, age, gender, phone, role FROM users WHERE id = :id AND role = 'user'";
+    $stmt = runQuery($conn, $sql, ['id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
