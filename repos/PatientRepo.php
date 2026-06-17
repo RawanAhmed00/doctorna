@@ -1,6 +1,6 @@
 <?php
 
-<?php
+
 
 // function createPatientRepo($conn, $data) {
 //     $query = "INSERT INTO users (name, email, phone,password, age, gender, phone, role, created_at) VALUES (?, ?, ?, NOW())";

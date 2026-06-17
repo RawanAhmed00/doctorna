@@ -1,6 +1,6 @@
 <?php
-require_once _DIR_ . "/../repositories/PatientRepository.php";
-require_once _DIR_ . "/../helpers/response.php";
+require_once __DIR__ . "/../repositories/PatientRepository.php";
+require_once __DIR__ . "/../helpers/response.php";
 
 // function createPatient($conn) {
 //     $data = json_decode(file_get_contents("php://input"), true);
