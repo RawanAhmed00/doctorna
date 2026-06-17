@@ -1,50 +1,47 @@
 <?php
+require_once __DIR__ . "/../repositories/PatientRepository.php";
+require_once __DIR__ . "/../helpers/response.php";
 
-require_once __DIR__ . '/../repos/PatientRepo.php';
-require_once __DIR__ . '/../helper/response.php';
-require_once __DIR__ . '/../helper/status.php';
-require_once __DIR__ . '/../helper/request.php';
-require_once __DIR__ . '/../helper/cache.php';
-require_once __DIR__ . '/../helper/JWT.php';
 
-function getPatient($conn, $id) {
-    $patient = getPatientById($conn, $id);
-    if (!$patient) {
-        response(HttpStatus('NOT_FOUND'), "Patient not found");
+function updatePatient($conn, $id) {
+    //user logs in, checking role
+    $verifiedToken=VerifyToken();
+    require_admin($verifiedToken);
+    //if admin, allow to take data
+    $data = json_decode(file_get_contents("php://input"), true);
+    
+
+    // Check if user exists
+    $existing = getPatientByIdRepo($conn, $id);
+    if (!$existing) {
+        response(404, "Patient not found");
+        return;
     }
-    return $patient;
+    
+    $result = updatePatientRepo($conn, $id, $data);
+    if ($result) {
+        response(200, "Patient updated successfully", $result);
+    } else {
+        response(500, "Failed to update patient");
+    }
 }
 
-function handleGetAllPatients($conn) {
-    $token = VerifyToken();
-    require_admin($token);
-
-    $cacheKey = "patients:all";
-    serveFromCacheIfAvailable($cacheKey, "Patients fetched successfully");
-
-    $patients = getAllPatients($conn);
-    saveToCache($cacheKey, $patients);
-
-    response(HttpStatus('OK'), "Patients fetched successfully", [
-        'source' => 'database',
-        'data' => $patients
-    ]);
-}
-
-function handleGetPatientById($conn) {
-    $token = VerifyToken();
-    require_admin($token);
-
-    $id = getRequiredId();
-    $cacheKey = "patient:" . $id;
-
-    serveFromCacheIfAvailable($cacheKey, "Patient fetched successfully");
-
-    $patient = getPatient($conn, $id);
-    saveToCache($cacheKey, $patient);
-
-    response(HttpStatus('OK'), "Patient fetched successfully", [
-        'source' => 'database',
-        'data' => $patient
-    ]);
+function deletePatient($conn, $id) {
+    //user logs in, checking role
+    $verifiedToken=VerifyToken();
+    require_admin($verifiedToken);
+    //if admin, allow to take data
+    // Check if user exists
+    $existing = getPatientByIdRepo($conn, $id);
+    if (!$existing) {
+        response(404, "Patient not found");
+        return;
+    }
+    
+    $result = deletePatientRepo($conn, $id);
+    if ($result) {
+        response(200, "Patient deleted successfully");
+    } else {
+        response(500, "Failed to delete patient");
+    }
 }
