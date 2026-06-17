@@ -1,17 +1,5 @@
 <?php
 
-
-
-// function createPatientRepo($conn, $data) {
-//     $query = "INSERT INTO users (name, email, phone,password, age, gender, phone, role, created_at) VALUES (?, ?, ?, NOW())";
-//     $stmt = $conn->prepare($query);
-//     $stmt->execute([$data['name'], $data['email'], $data['phone'],
-//     $data['age'], $data['gender'], $data['phone'], ]);
-    
-//     $id = $conn->lastInsertId();
-//     return getPatientByIdRepo($conn, $id);
-// }
-
 function updatePatientRepo($conn, $id, $data) {
     $fields = [];
     $values = [];

@@ -2,22 +2,6 @@
 require_once __DIR__ . "/../repositories/PatientRepository.php";
 require_once __DIR__ . "/../helpers/response.php";
 
-// function createPatient($conn) {
-//     $data = json_decode(file_get_contents("php://input"), true);
-    
-    
-//     if (!isset($data['name']) || !isset($data['email']) || !isset($data['phone'])) {
-//         response(400, "Missing required fields: name, email, phone");
-//         return;
-//     }
-    
-//     $result = createPatientRepo($conn, $data);
-//     if ($result) {
-//         response(201, "Patient created successfully", $result);
-//     } else {
-//         response(500, "Failed to create patient");
-//     }
-// }
 
 function updatePatient($conn, $id) {
     //user logs in, checking role

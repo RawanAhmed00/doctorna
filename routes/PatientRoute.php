@@ -9,13 +9,6 @@ header("Content-Type: application/json");
 $method = $_SERVER['REQUEST_METHOD'];
 $path = $_SERVER['PATH_INFO'] ?? '';
 
-
-// if ($method == "POST" && $path == "/patient") {
-//     require_once _DIR_ . "/../controllers/PatientController.php";
-//     createPatient($conn);
-// }
-
-
 if ($method == "PUT" && $path == "/patient" && isset($_GET['id'])) {
     require_once _DIR_ . "/../controllers/PatientController.php";
     updatePatient($conn, $_GET['id']);
