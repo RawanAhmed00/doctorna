@@ -6,8 +6,9 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../helper/response.php';
 require_once __DIR__ . '/../helper/status.php';
 require_once __DIR__ . '/../Controllers/SpecialityController.php';
-require_once __DIR__ .'/../helper/JWT.php';
-require_once __DIR__ .'/../vendor/predis/src/autoload.php';
+require_once __DIR__ . '/../helper/JWT.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+$redis=false;
 
 // Set CORS headers
 header("Access-Control-Allow-Origin: *");
@@ -74,4 +75,4 @@ if ($resource === 'specialities') {
 } else {
     response(404, "Resource not found. Available: /specialities");
 }
-?>
+?> 
