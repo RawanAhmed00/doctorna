@@ -24,12 +24,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/AuthRoute.php/auth/register",
+                            "raw": "{{base_url}}/api.php/auth/register",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "AuthRoute.php",
+                            "path": ["api.php",
                                 "auth",
                                 "register"
                             ]
@@ -51,12 +50,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/AuthRoute.php/auth/login",
+                            "raw": "{{base_url}}/api.php/auth/login",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "AuthRoute.php",
+                            "path": ["api.php",
                                 "auth",
                                 "login"
                             ]
@@ -78,12 +76,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/AuthRoute.php/auth/forgot-password",
+                            "raw": "{{base_url}}/api.php/auth/forgot-password",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "AuthRoute.php",
+                            "path": ["api.php",
                                 "auth",
                                 "forgot-password"
                             ]
@@ -105,12 +102,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/AuthRoute.php/auth/reset-password",
+                            "raw": "{{base_url}}/api.php/auth/reset-password",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "AuthRoute.php",
+                            "path": ["api.php",
                                 "auth",
                                 "reset-password"
                             ]
@@ -128,12 +124,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/DoctorRoute.php/doctors",
+                            "raw": "{{base_url}}/api.php/doctors",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "DoctorRoute.php",
+                            "path": ["api.php",
                                 "doctors"
                             ],
                             "query": [
@@ -166,12 +161,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
+                            "raw": "{{base_url}}/api.php/doctors?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "DoctorRoute.php",
+                            "path": ["api.php",
                                 "doctors"
                             ],
                             "query": [
@@ -208,12 +202,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/DoctorRoute.php/doctors",
+                            "raw": "{{base_url}}/api.php/doctors",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "DoctorRoute.php",
+                            "path": ["api.php",
                                 "doctors"
                             ]
                         }
@@ -244,12 +237,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
+                            "raw": "{{base_url}}/api.php/doctors?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "DoctorRoute.php",
+                            "path": ["api.php",
                                 "doctors"
                             ],
                             "query": [
@@ -277,12 +269,11 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
+                            "raw": "{{base_url}}/api.php/doctors?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "DoctorRoute.php",
+                            "path": ["api.php",
                                 "doctors"
                             ],
                             "query": [
@@ -315,12 +306,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments",
+                            "raw": "{{base_url}}/api.php/appointments",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "AppointmentsRoute.php",
+                            "path": ["api.php",
                                 "appointments"
                             ],
                             "query": [
@@ -363,12 +353,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments?id=1",
+                            "raw": "{{base_url}}/api.php/appointments?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "AppointmentsRoute.php",
+                            "path": ["api.php",
                                 "appointments"
                             ],
                             "query": [
@@ -405,12 +394,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments",
+                            "raw": "{{base_url}}/api.php/appointments",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "AppointmentsRoute.php",
+                            "path": ["api.php",
                                 "appointments"
                             ]
                         }
@@ -441,12 +429,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments?id=1",
+                            "raw": "{{base_url}}/api.php/appointments?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "AppointmentsRoute.php",
+                            "path": ["api.php",
                                 "appointments"
                             ],
                             "query": [
@@ -479,12 +466,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/PatientRoute.php/patients",
+                            "raw": "{{base_url}}/api.php/patients",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "PatientRoute.php",
+                            "path": ["api.php",
                                 "patients"
                             ],
                             "query": [
@@ -520,12 +506,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "raw": "{{base_url}}/api.php/patients?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "PatientRoute.php",
+                            "path": ["api.php",
                                 "patients"
                             ],
                             "query": [
@@ -562,12 +547,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "raw": "{{base_url}}/api.php/patients?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "PatientRoute.php",
+                            "path": ["api.php",
                                 "patients"
                             ],
                             "query": [
@@ -595,12 +579,11 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "raw": "{{base_url}}/api.php/patients?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "PatientRoute.php",
+                            "path": ["api.php",
                                 "patients"
                             ],
                             "query": [
@@ -633,12 +616,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/PatientRoute.php/patients",
+                            "raw": "{{base_url}}/api.php/patients",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "PatientRoute.php",
+                            "path": ["api.php",
                                 "patients"
                             ],
                             "query": [
@@ -674,12 +656,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "raw": "{{base_url}}/api.php/patients?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "PatientRoute.php",
+                            "path": ["api.php",
                                 "patients"
                             ],
                             "query": [
@@ -716,12 +697,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "raw": "{{base_url}}/api.php/patients?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "PatientRoute.php",
+                            "path": ["api.php",
                                 "patients"
                             ],
                             "query": [
@@ -749,12 +729,11 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/PatientRoute.php/patients?id=1",
+                            "raw": "{{base_url}}/api.php/patients?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "PatientRoute.php",
+                            "path": ["api.php",
                                 "patients"
                             ],
                             "query": [
@@ -777,12 +756,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/SubServiceRoute.php/subservices",
+                            "raw": "{{base_url}}/api.php/subservices",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "SubServiceRoute.php",
+                            "path": ["api.php",
                                 "subservices"
                             ],
                             "query": [
@@ -808,12 +786,11 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/SubServiceRoute.php/subservices?id=1",
+                            "raw": "{{base_url}}/api.php/subservices?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "SubServiceRoute.php",
+                            "path": ["api.php",
                                 "subservices"
                             ],
                             "query": [
@@ -850,12 +827,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/SubServiceRoute.php/subservices",
+                            "raw": "{{base_url}}/api.php/subservices",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "SubServiceRoute.php",
+                            "path": ["api.php",
                                 "subservices"
                             ]
                         }
@@ -886,12 +862,11 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/SubServiceRoute.php/subservices?id=1",
+                            "raw": "{{base_url}}/api.php/subservices?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "SubServiceRoute.php",
+                            "path": ["api.php",
                                 "subservices"
                             ],
                             "query": [
@@ -919,12 +894,11 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/SubServiceRoute.php/subservices?id=1",
+                            "raw": "{{base_url}}/api.php/subservices?id=1",
                             "host": [
                                 "{{base_url}}"
                             ],
-                            "path": [
-                                "SubServiceRoute.php",
+                            "path": ["api.php",
                                 "subservices"
                             ],
                             "query": [
