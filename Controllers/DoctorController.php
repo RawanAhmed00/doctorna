@@ -54,32 +54,28 @@ function clearDoctorCache($id = null) {
 }
 
 function handleGetAllDoctors($conn) {
-    // Get headers case-insensitively
-    $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-    $requestType = $headers['x-request-type'] ?? 'all';
+    // Validate filter values if they are provided
+    if (isset($_GET['gender']) && !in_array(strtolower($_GET['gender']), ['male', 'female'])) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid gender filter. Allowed: male, female");
+    }
+    if (isset($_GET['rank']) && !in_array(strtolower($_GET['rank']), ['intern', 'resident', 'specialist', 'senior specialist', 'consultant'])) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid rank filter. Allowed: intern, resident, specialist, senior specialist, consultant");
+    }
+    if (isset($_GET['is_available']) && !in_array($_GET['is_available'], [0, 1, '0', '1'], true)) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid is_available filter. Allowed: 0 or 1");
+    }
 
-    if ($requestType === 'filter') {
-        // Validate filter values
-        if (isset($_GET['gender']) && !in_array(strtolower($_GET['gender']), ['male', 'female'])) {
-            response(HttpStatus('BAD_REQUEST'), "Invalid gender filter. Allowed: male, female");
+    // Check if any valid filters are present to build a dynamic cache key
+    $filterParams = [];
+    $allowed = ['gender', 'rank', 'is_available'];
+    
+    foreach ($allowed as $key) {
+        if (isset($_GET[$key]) && $_GET[$key] !== '') {
+            $filterParams[$key] = $_GET[$key];
         }
-        if (isset($_GET['rank']) && !in_array(strtolower($_GET['rank']), ['intern', 'resident', 'specialist', 'senior specialist', 'consultant'])) {
-            response(HttpStatus('BAD_REQUEST'), "Invalid rank filter. Allowed: intern, resident, specialist, senior specialist, consultant");
-        }
-        if (isset($_GET['is_available']) && !in_array($_GET['is_available'], [0, 1, '0', '1'], true)) {
-            response(HttpStatus('BAD_REQUEST'), "Invalid is_available filter. Allowed: 0 or 1");
-        }
+    }
 
-        // Collect only allowed filters from GET parameters
-        $filterParams = [];
-        $allowed = ['gender', 'rank', 'is_available'];
-        
-        foreach ($allowed as $key) {
-            if (isset($_GET[$key])) {
-                $filterParams[$key] = $_GET[$key];
-            }
-        }
-        
+    if (!empty($filterParams)) {
         ksort($filterParams); // Sort alphabetically for consistent cache key
         $cacheKey = 'doctors:filter:' . http_build_query($filterParams);
     } else {
@@ -88,7 +84,7 @@ function handleGetAllDoctors($conn) {
 
     serveFromCacheIfAvailable($cacheKey, "Doctors fetched successfully");
 
-    $doctors = getAllDoctors($conn, $requestType);
+    $doctors = getAllDoctors($conn);
     saveToCache($cacheKey, $doctors);
 
     response(HttpStatus('OK'), "Doctors fetched successfully", [

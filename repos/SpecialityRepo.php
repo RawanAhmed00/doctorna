@@ -11,8 +11,17 @@ function getAllSpecialities($conn) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getSpecialityById($conn, $id) {
-    $sql = "SELECT * FROM speciality WHERE id = :id AND deleted_at IS NULL";
+function getSpecialityById($conn, $id, $includeDoctorsCount = false) {
+    if ($includeDoctorsCount) {
+        $sql = "SELECT s.*, COUNT(d.id) as doctors_count 
+                FROM speciality s 
+                LEFT JOIN doctors d ON d.spec_id = s.id AND d.deleted_at IS NULL 
+                WHERE s.id = :id AND s.deleted_at IS NULL 
+                GROUP BY s.id";
+    } else {
+        $sql = "SELECT * FROM speciality WHERE id = :id AND deleted_at IS NULL";
+    }
+    
     $stmt = runQuery($conn, $sql, ['id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
@@ -47,12 +56,4 @@ function softDeleteSpeciality($conn, $id) {
     runQuery($conn, $sql, ['id' => $id]);
 }
 
-function getSpecialityWithDoctorsCount($conn, $id) {
-    $sql = "SELECT s.*, COUNT(d.id) as doctors_count 
-              FROM speciality s 
-              LEFT JOIN doctors d ON d.spec_id = s.id AND d.deleted_at IS NULL 
-              WHERE s.id = :id AND s.deleted_at IS NULL 
-              GROUP BY s.id";
-    $stmt = runQuery($conn, $sql, ['id' => $id]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+

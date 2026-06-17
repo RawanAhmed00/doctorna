@@ -1,7 +1,7 @@
 {
     "info": {
-        "name": "Doctorna API v2 (Complete Integration)",
-        "description": "\n# Doctorna API v2 (Complete Integration)\n\nWelcome to the **Doctorna API**! This collection is ready-to-use for testing all modules: Authentication, Doctors, Appointments, Patients, and Specialities.\n\n---\n\n## \ud83d\udea6 How to Use This Collection\n\n### 1. Set Your Base URL\nGo to the **Variables** tab of this collection. Ensure the `base_url` variable correctly points to your local environment (e.g., `http://localhost/threedos-backend/tasks/task-06/doctorna/routes`).\n\n### 2. Login to Get Your Tokens\n1. Open the **1. Authentication** folder.\n2. Run **Register (Public)** to create an Admin user (change `role` to `admin` in the body) and a standard User (role `user`).\n3. Run **Login (Public)** with those credentials.\n4. **Important:** Copy the `token` from the login response.\n5. Go to the collection's **Variables** tab and paste it into:\n   - `admin_token` (if you logged in as Admin)\n   - `user_token` (if you logged in as User)\n\n### 3. Authorization is Automatic\nYou do not need to paste your token into every request! We have configured this collection to automatically use `{{admin_token}}` or `{{user_token}}` depending on what permission the endpoint requires.\n\n### 4. Dynamic Filtering (X-Request-Type)\nFor endpoints like **Filter Doctors**, notice that we use the `X-Request-Type: filter` Header. This tells the server to actively look at your Query Parameters (`?gender=female&rank=specialist`) and apply them dynamically to the database.\n\n---\n\n## \ud83d\udd10 Role Definitions\n- **Public**: No token required (e.g., Browsing Doctors, Specialities, Logging in).\n- **User**: Requires `{{user_token}}`. Can only access their own Appointments and book new ones.\n- **Admin**: Requires `{{admin_token}}`. Has global access to Create, Update, Delete, and view all system records.\n",
+        "name": "Doctorna API v2 (Minimal & Clean)",
+        "description": "# Doctorna API v2\n\nThis collection has been strictly optimized. All redundant endpoints have been removed. \n\n## \ud83d\udd0d How Filtering Works\nOur API is smart. You do **not** need to hit separate \"filter\" endpoints or send custom headers.\n\nTo filter data, simply add query parameters to any `GET` request!\n\n**Examples:**\n- `GET /doctors` -> Returns all doctors.\n- `GET /doctors?gender=female&rank=specialist` -> Automatically returns filtered doctors.\n- `GET /specialities?name=Dentist` -> Returns specific specialities.\n- `GET /appointments?status=pending` -> Returns pending appointments.\n\n## \ud83d\udcca Bonus Features (Query Flags)\n- `GET /specialities?id=1&include_doctors=1` -> Appends a `doctors_count` field to the speciality response.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -33,8 +33,7 @@
                                 "auth",
                                 "register"
                             ]
-                        },
-                        "description": "Register a new user. Role must be 'user'. Password requires upper, lower, number, and special char."
+                        }
                     }
                 },
                 {
@@ -61,8 +60,7 @@
                                 "auth",
                                 "login"
                             ]
-                        },
-                        "description": "Login to receive your JWT token. Copy the token to collection variables (user_token or admin_token)."
+                        }
                     }
                 },
                 {
@@ -89,8 +87,7 @@
                                 "auth",
                                 "forgot-password"
                             ]
-                        },
-                        "description": "Generates a reset token and sends it via email (simulated)."
+                        }
                     }
                 },
                 {
@@ -117,53 +114,21 @@
                                 "auth",
                                 "reset-password"
                             ]
-                        },
-                        "description": "Reset password using the token sent to your email."
+                        }
                     }
                 }
             ]
         },
         {
             "name": "2. Doctors",
-            "description": "Endpoints for browsing and managing doctors. Browsing is public, management is Admin only.",
             "item": [
                 {
-                    "name": "Get All Doctors (Public)",
+                    "name": "Get All / Filter Doctors (Public)",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-Request-Type",
-                                "value": "all",
-                                "type": "text"
-                            }
-                        ],
+                        "header": [],
                         "url": {
                             "raw": "{{base_url}}/DoctorRoute.php/doctors",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "DoctorRoute.php",
-                                "doctors"
-                            ]
-                        },
-                        "description": "Fetch all active doctors. Uses Redis cache `doctors:all`."
-                    }
-                },
-                {
-                    "name": "Filter Doctors (Public)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-Request-Type",
-                                "value": "filter",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/DoctorRoute.php/doctors?gender=female&rank=specialist&is_available=1",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -175,21 +140,24 @@
                                 {
                                     "key": "gender",
                                     "value": "female",
-                                    "description": "male or female"
+                                    "disabled": true,
+                                    "description": "Optional: male or female"
                                 },
                                 {
                                     "key": "rank",
                                     "value": "specialist",
-                                    "description": "intern, resident, specialist, etc."
+                                    "disabled": true,
+                                    "description": "Optional: intern, resident, specialist, etc."
                                 },
                                 {
                                     "key": "is_available",
                                     "value": "1",
-                                    "description": "0 or 1"
+                                    "disabled": true,
+                                    "description": "Optional: 0 or 1"
                                 }
                             ]
                         },
-                        "description": "Filter doctors dynamically. **Requires `X-Request-Type: filter` header.** Creates unique Redis cache per filter combo."
+                        "description": "Fetch all doctors. Check the 'Params' tab in Postman to easily toggle optional filters on/off!"
                     }
                 },
                 {
@@ -212,8 +180,7 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "Get a single doctor's details."
+                        }
                     }
                 },
                 {
@@ -249,55 +216,11 @@
                                 "DoctorRoute.php",
                                 "doctors"
                             ]
-                        },
-                        "description": "Add a new doctor to the system. Requires Admin JWT."
+                        }
                     }
                 },
                 {
-                    "name": "Update Doctor - Full (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{admin_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "PUT",
-                        "header": [],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Dr. Jane Doe\",\n    \"email\": \"janedoe@doctorna.com\",\n    \"rank\": \"consultant\",\n    \"gender\": \"female\",\n    \"is_available\": 0,\n    \"spec_id\": 1\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/DoctorRoute.php/doctors?id=1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "DoctorRoute.php",
-                                "doctors"
-                            ],
-                            "query": [
-                                {
-                                    "key": "id",
-                                    "value": "1"
-                                }
-                            ]
-                        },
-                        "description": "Fully replace a doctor's record. Requires all fields."
-                    }
-                },
-                {
-                    "name": "Patch Doctor - Partial (Admin)",
+                    "name": "Update Doctor (Admin)",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -335,8 +258,7 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "Update specific fields of a doctor without providing the full object."
+                        }
                     }
                 },
                 {
@@ -369,18 +291,16 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "Soft delete a doctor. Clears all associated Redis caches."
+                        }
                     }
                 }
             ]
         },
         {
             "name": "3. Appointments",
-            "description": "Endpoints for booking and tracking appointments. Role-based isolation ensures users only see their own.",
             "item": [
                 {
-                    "name": "Get All Appointments (User/Admin)",
+                    "name": "Get All / Filter Appointments",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -402,54 +322,29 @@
                             "path": [
                                 "AppointmentsRoute.php",
                                 "appointments"
-                            ]
-                        },
-                        "description": "Fetch appointments. **Users** receive only their own appointments. **Admins** receive all appointments across the system."
-                    }
-                },
-                {
-                    "name": "Filter Appointments (User/Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{user_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/AppointmentsRoute.php/appointments?status=pending&date_time=2026-06-20",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "AppointmentsRoute.php",
-                                "appointments"
                             ],
                             "query": [
                                 {
                                     "key": "status",
                                     "value": "pending",
-                                    "description": "pending, confirmed, cancelled, completed"
+                                    "disabled": true,
+                                    "description": "Optional: pending, confirmed, cancelled, completed"
                                 },
                                 {
                                     "key": "date_time",
                                     "value": "2026-06-20",
-                                    "description": "Format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS"
+                                    "disabled": true,
+                                    "description": "Optional: YYYY-MM-DD"
                                 },
                                 {
                                     "key": "doc_id",
                                     "value": "1",
-                                    "description": "Filter by Doctor ID"
+                                    "disabled": true,
+                                    "description": "Optional: Filter by Doctor ID"
                                 }
                             ]
                         },
-                        "description": "Filter your appointments dynamically. Automatically scopes to the authenticated user."
+                        "description": "Users see only their own. Admins see all. Check 'Params' tab to toggle filters."
                     }
                 },
                 {
@@ -482,8 +377,7 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "Retrieve a specific appointment by ID. Restricted to Admins."
+                        }
                     }
                 },
                 {
@@ -519,8 +413,7 @@
                                 "AppointmentsRoute.php",
                                 "appointments"
                             ]
-                        },
-                        "description": "Book a new appointment. The `user_id` is securely extracted from your JWT token. Only users can perform this."
+                        }
                     }
                 },
                 {
@@ -540,7 +433,7 @@
                         "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"status\": \"confirmed\",\n    \"date_time\": \"2026-06-22 14:30:00\"\n}",
+                            "raw": "{\n    \"status\": \"confirmed\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -562,15 +455,13 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "Change appointment details (e.g. confirming a booking). Partial updates allowed. Admin only."
+                        }
                     }
                 }
             ]
         },
         {
             "name": "4. Patients",
-            "description": "Endpoints for managing patients (users). Restricted to Admins.",
             "item": [
                 {
                     "name": "Get All Patients (Admin)",
@@ -596,8 +487,7 @@
                                 "PatientRoute.php",
                                 "patients"
                             ]
-                        },
-                        "description": "Fetch all patients (users with role='user'). Secured for Admin access only. Uses Redis cache `patients:all`."
+                        }
                     }
                 },
                 {
@@ -630,18 +520,16 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "Retrieve details for a specific patient by their ID. Secured for Admin access only."
+                        }
                     }
                 }
             ]
         },
         {
             "name": "5. Specialities",
-            "description": "Endpoints for managing medical specialities.",
             "item": [
                 {
-                    "name": "Get All Specialities (Public)",
+                    "name": "Get All / Filter Specialities",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -653,33 +541,17 @@
                             "path": [
                                 "SpecialityRoute.php",
                                 "specialities"
-                            ]
-                        },
-                        "description": "Fetch all active specialities. Public access. Uses Redis caching."
-                    }
-                },
-                {
-                    "name": "Filter Specialities by Name (Public)",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/SpecialityRoute.php/specialities?name=Dentist",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "SpecialityRoute.php",
-                                "specialities"
                             ],
                             "query": [
                                 {
                                     "key": "name",
-                                    "value": "Dentist"
+                                    "value": "Dentist",
+                                    "disabled": true,
+                                    "description": "Optional: Filter exactly by name"
                                 }
                             ]
                         },
-                        "description": "Search/filter specialities exactly by name. Uses Redis caching."
+                        "description": "Check 'Params' tab to toggle optional filtering."
                     }
                 },
                 {
@@ -700,38 +572,16 @@
                                 {
                                     "key": "id",
                                     "value": "1"
-                                }
-                            ]
-                        },
-                        "description": "Get a specific speciality by ID."
-                    }
-                },
-                {
-                    "name": "Get Speciality w/ Doctors Count (Public)",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/SpecialityRoute.php/specialities?id=1&include_doctors=1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "SpecialityRoute.php",
-                                "specialities"
-                            ],
-                            "query": [
-                                {
-                                    "key": "id",
-                                    "value": "1"
                                 },
                                 {
                                     "key": "include_doctors",
-                                    "value": "1"
+                                    "value": "1",
+                                    "disabled": true,
+                                    "description": "Optional: Set to 1 to include doctors_count"
                                 }
                             ]
                         },
-                        "description": "Get a specific speciality and exactly how many active doctors are assigned to it."
+                        "description": "Check 'Params' tab to toggle the include_doctors flag."
                     }
                 },
                 {
@@ -751,7 +601,7 @@
                         "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"name\": \"Cardiology\",\n    \"description\": \"Heart and blood vessel specialists.\"\n}",
+                            "raw": "{\n    \"name\": \"Cardiology\",\n    \"description\": \"Heart specialists.\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -767,8 +617,7 @@
                                 "SpecialityRoute.php",
                                 "specialities"
                             ]
-                        },
-                        "description": "Add a new speciality to the database. Requires Admin JWT."
+                        }
                     }
                 },
                 {
@@ -784,11 +633,11 @@
                                 }
                             ]
                         },
-                        "method": "PUT",
+                        "method": "PATCH",
                         "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"name\": \"Cardiology\",\n    \"description\": \"Updated description for heart specialists.\"\n}",
+                            "raw": "{\n    \"description\": \"Updated description.\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -810,8 +659,7 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "Update an existing speciality. Requires Admin JWT."
+                        }
                     }
                 },
                 {
@@ -844,8 +692,7 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "Soft delete a speciality. Requires Admin JWT."
+                        }
                     }
                 }
             ]

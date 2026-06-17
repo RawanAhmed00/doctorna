@@ -8,12 +8,11 @@ require_once __DIR__ . '/../helper/cache.php';
 require_once __DIR__ . '/../helper/JWT.php';
 
 function getSpeciality($conn, $id) {
-    // Support include_doctors query param to use getSpecialityWithDoctorsCount
-    if (isset($_GET['include_doctors']) && $_GET['include_doctors'] == '1') {
-        $speciality = getSpecialityWithDoctorsCount($conn, $id);
-    } else {
-        $speciality = getSpecialityById($conn, $id);
-    }
+    // Check if include_doctors query param is present and truthy
+    $includeCount = isset($_GET['include_doctors']) && $_GET['include_doctors'] == '1';
+    
+    $speciality = getSpecialityById($conn, $id, $includeCount);
+    
     if (!$speciality) {
         response(HttpStatus('NOT_FOUND'), "Speciality not found");
     }
