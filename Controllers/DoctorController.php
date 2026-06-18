@@ -116,10 +116,11 @@ function handleUpdateDoctor($conn) {
     checkAdminPrivileges();
 
     $id = getRequiredId();
-    getDoctor($conn, $id);
 
-    // Require all fields for full PUT update
-    $data = getJsonInput(['name', 'email', 'rank', 'gender', 'is_available', 'spec_id']);
+    // Merge sent data with existing record so PUT accepts partial input
+    $existing = getDoctor($conn, $id);
+    $input    = getJsonInput();
+    $data = array_merge($existing, $input);
 
     validateDoctorData($data);
 
