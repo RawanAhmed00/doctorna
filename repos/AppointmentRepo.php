@@ -56,8 +56,8 @@ function getAppointmentsByUserId($conn, $user_id) {
 }
 
 function createAppointment($conn, $data) {
-    $sql = "INSERT INTO appointments (status, date_time, user_id, doc_id, spec_id, type, parent_id) 
-            VALUES (:status, :date_time, :user_id, :doc_id, :spec_id, :type, :parent_id)";
+    $sql = "INSERT INTO appointments (status, date_time, user_id, doc_id, spec_id) 
+            VALUES (:status, :date_time, :user_id, :doc_id, :spec_id)";
     runQuery($conn, $sql, [
         'status' => $data['status'],
         'date_time' => $data['date_time'],
