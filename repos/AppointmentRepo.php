@@ -53,7 +53,7 @@ function getAppointmentsByUserId($conn, $user_id) {
     return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
-function createAppointment($conn, $data) {
+function createAppointment($conn, $data){
     $sql = "INSERT INTO appointments (status, date_time, user_id, doc_id, spec_id) 
             VALUES (:status, :date_time, :user_id, :doc_id, :spec_id)";
     runQuery($conn, $sql, [
