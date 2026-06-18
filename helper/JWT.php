@@ -6,8 +6,16 @@ require_once __DIR__ . '/response.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
+function getJwtSecret(): string {
+    $secret = env('JWT_SECRET');
+    if (empty($secret)) {
+        response(HttpStatus('INTERNAL_SERVER_ERROR'), "Server configuration error: JWT_SECRET is not set.");
+    }
+    return $secret;
+}
+
 function GenerateToken($user){
-   
+    
 $payload=[
 "iat" => time(),
 "exp" => time()+3600,
@@ -15,7 +23,7 @@ $payload=[
 "role" => $user['role']
 ];
 
-$secret = env('JWT_SECRET', "B0RN0Jx6muUoyGJGmahlRiQJ6mpNXEDQShyHT8bCbYp");
+$secret = getJwtSecret();
 return JWT::encode($payload, $secret, "HS256");
 
 }
@@ -31,7 +39,7 @@ if(!$token){
 $token = str_replace("Bearer " ,"",$token);
 
 try{
-$secret = env('JWT_SECRET', "B0RN0Jx6muUoyGJGmahlRiQJ6mpNXEDQShyHT8bCbYp");
+$secret = getJwtSecret();
 $decoded = JWT::decode($token , new key($secret , "HS256"));
 
 return $decoded;

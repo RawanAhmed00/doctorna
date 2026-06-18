@@ -22,6 +22,12 @@ require_once __DIR__ . '/../Controllers/SubServiceController.php';
 
 header("Content-Type: application/json");
 
+// Global exception handler — catches unhandled PDOExceptions and other errors
+set_exception_handler(function (Throwable $e) {
+    error_log("Unhandled exception: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+    response(HttpStatus('INTERNAL_SERVER_ERROR'), "Internal Server Error — Something went wrong on our side.");
+});
+
 // ==============================================================================
 // 1. URL PARSER & ROUTING ENGINE
 // ==============================================================================
