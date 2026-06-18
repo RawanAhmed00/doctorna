@@ -177,11 +177,11 @@ return $stmt->rowCount();`),
 
     h2('2.4 Error Handling Strategy'),
     p('The db.php helper does NOT catch PDO exceptions. This is intentional. PDO is configured to throw PDOException on errors (PDO::ERRMODE_EXCEPTION). These exceptions propagate up to the Controller, which is responsible for catching and formatting the error response. This separation of concerns keeps db.php lean while giving each Controller the flexibility to handle database errors in context-specific ways.'),
-    p('In practice, most controllers do not catch PDOExceptions either — they propagate to the top-level caller in api.php. A future enhancement would add a global exception handler in api.php that catches all unhandled exceptions and returns a standardized 500 error with logging. Currently, unhandled PDO exceptions would return a raw PHP error, which is an acknowledged gap.'),
+    p('To handle exceptions that escape all controllers, api.php registers a global exception handler via set_exception_handler(). This catches any unhandled Throwable — including PDOExceptions — logs it with file and line details, and returns a standardized 500 JSON response. This ensures database errors never leak schema information to clients.'),
 
-    calloutOrange([
-      t('🚨 Known Gap: ', { color: 'orange', bold: true }),
-      t('There is no global exception handler in api.php. If a PDOException occurs, PHP will output a raw error that may expose database details. Production deployments should add set_exception_handler() in the bootstrap to catch and log all exceptions, returning a generic 500 JSON response.'),
+    calloutGreen([
+      t('⚡ Resolved: ', { color: 'green', bold: true }),
+      t('set_exception_handler() is registered in api.php. All unhandled exceptions are caught, logged via error_log(), and return a generic 500 JSON response with no schema exposure.'),
     ]),
 
     divider(),
@@ -217,8 +217,8 @@ $redis = new Client([
     'port'   => env('REDIS_PORT', 6379)
 ]);
 
-// In jwt.php
-$secret = env('JWT_SECRET', "default-fallback-secret");
+// In jwt.php — fails loudly if env var missing
+$secret = getJwtSecret();
 return JWT::encode($payload, $secret, "HS256");`),
 
     h2('3.3 The function_exists() Guard'),
@@ -226,7 +226,7 @@ return JWT::encode($payload, $secret, "HS256");`),
 
     calloutBlue([
       t('💡 Best Practice: ', { color: 'blue', bold: true }),
-      t('Environment variables should never be hardcoded in helper files for production. The default fallback in env() should only be used for development defaults. Production deployments must set real values in .env or through system environment variables. The JWT secret in jwt.php is the only file with a hardcoded fallback, which should be replaced in production.'),
+      t('The JWT secret now uses getJwtSecret(), which has no default fallback. If JWT_SECRET is missing from the environment, the API returns a 500 error immediately. This fails loudly in development and forces proper configuration in production.'),
     ]),
 
     divider(),
@@ -302,6 +302,15 @@ require_once __DIR__ . '/response.php';
 use Firebase\\JWT\\JWT;
 use Firebase\\JWT\\Key;
 
+function getJwtSecret(): string {
+    $secret = env('JWT_SECRET');
+    if (empty($secret)) {
+        response(HttpStatus('INTERNAL_SERVER_ERROR'),
+            "Server config error: JWT_SECRET is not set.");
+    }
+    return $secret;
+}
+
 function GenerateToken($user){
     $payload = [
         "iat" => time(),
@@ -309,7 +318,7 @@ function GenerateToken($user){
         "user_id" => $user['id'],
         "role" => $user['role']
     ];
-    $secret = env('JWT_SECRET', "B0RN0Jx6...");
+    $secret = getJwtSecret();
     return JWT::encode($payload, $secret, "HS256");
 }
 
@@ -321,7 +330,7 @@ function VerifyToken(){
     }
     $token = str_replace("Bearer ", "", $token);
     try {
-        $secret = env('JWT_SECRET', "B0RN0Jx6...");
+        $secret = getJwtSecret();
         $decoded = JWT::decode($token, new Key($secret, "HS256"));
         return $decoded;
     } catch (Exception $e) {
@@ -838,18 +847,18 @@ function handleGetAllAppointments($conn) {
       ['cache.php', '🟡 Medium', 'Predis connection on localhost only. Graceful degradation on Redis failure. Error logging may expose keys in server logs.']
     ]),
 
-    h2('13.1 Critical Recommendations'),
-    calloutRed([
-      t('⚠️ High Priority: ', { color: 'red', bold: true }),
-      t('Replace the hardcoded JWT secret fallback in jwt.php with a strict env() that has no default. In production, if JWT_SECRET is missing, the application should fail loudly rather than silently using a weak default.'),
+    h2('13.1 Resolved & Remaining Items'),
+    calloutGreen([
+      t('✅ Resolved — High: ', { color: 'green', bold: true }),
+      t('JWT secret fallback removed. getJwtSecret() fails with 500 if JWT_SECRET env var is missing.'),
     ]),
-    calloutOrange([
-      t('🚨 Medium Priority: ', { color: 'orange', bold: true }),
-      t('Add a global exception handler in api.php using set_exception_handler() to catch unhandled PDOExceptions and return a standardized 500 JSON response. Without this, database errors may leak schema information.'),
+    calloutGreen([
+      t('✅ Resolved — Medium: ', { color: 'green', bold: true }),
+      t('Global exception handler added via set_exception_handler() in api.php. All unhandled Throwables return 500 JSON.'),
     ]),
     calloutBlue([
-      t('💡 Low Priority: ', { color: 'blue', bold: true }),
-      t('Add rate limiting middleware (via Redis INCR with expiry) to the authentication endpoints to prevent brute-force attacks on login and registration.'),
+      t('💡 Low Priority — Not Yet Implemented: ', { color: 'blue', bold: true }),
+      t('Rate limiting middleware (via Redis INCR with expiry) on authentication endpoints to prevent brute-force attacks on login and registration.'),
     ]),
 
     divider(),
