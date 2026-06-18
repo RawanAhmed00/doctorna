@@ -77,13 +77,45 @@ function handleCreateAppointment($conn) {
         response(HttpStatus('FORBIDDEN'), "Only users can book appointments");
     }
 
+    // subservice_ids is optional, but if provided must be an array
     $data = getJsonInput(['status', 'date_time', 'doc_id']);
+    
+    // Check if body has subservice_ids
+    $rawBody = json_decode(file_get_contents("php://input"), true) ?? [];
+    if (isset($rawBody['subservice_ids'])) {
+        if (!is_array($rawBody['subservice_ids'])) {
+            response(HttpStatus('BAD_REQUEST'), "subservice_ids must be an array");
+        }
+        $data['subservice_ids'] = $rawBody['subservice_ids'];
+        
+        // Validation Rule: Does this doctor actually offer these subservices?
+        // We fetch the doctor's capabilities from doctor_subservices
+        require_once __DIR__ . '/../repos/DoctorRepo.php';
+        $doctorOffers = getDoctorSubServices($conn, $data['doc_id']);
+        $offeredIds = array_column($doctorOffers, 'id');
+        
+        foreach ($data['subservice_ids'] as $requested_id) {
+            if (!in_array($requested_id, $offeredIds)) {
+                response(HttpStatus('BAD_REQUEST'), "The selected doctor does not offer subservice ID: $requested_id");
+            }
+        }
+    }
     
     validateAppointmentData($data);
 
     $data['user_id'] = $token->user_id; // Securely take from token
 
     $newAppointment = createAppointment($conn, $data);
+    
+    // Clear caches
+    global $redis;
+    try {
+        $keys = $redis->keys('appointments:*');
+        if (!empty($keys)) {
+            foreach ($keys as $key) $redis->del($key);
+        }
+    } catch (Exception $e) {}
+    
     response(HttpStatus('CREATED'), "Appointment booked successfully", $newAppointment);
 }
 

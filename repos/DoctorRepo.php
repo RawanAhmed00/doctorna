@@ -16,6 +16,26 @@ function getDoctorById($conn, $id) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function getDoctorSubServices($conn, $doctor_id) {
+    $sql = "SELECT s.* 
+            FROM sub_services s
+            INNER JOIN doctor_subservices ds ON s.id = ds.subservice_id
+            WHERE ds.doctor_id = :doctor_id AND s.deleted_at IS NULL";
+    $stmt = runQuery($conn, $sql, ['doctor_id' => $doctor_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function assignSubServiceToDoctor($conn, $doctor_id, $subservice_id) {
+    // IGNORE if already exists to prevent duplicate key error
+    $sql = "INSERT IGNORE INTO doctor_subservices (doctor_id, subservice_id) 
+            VALUES (:doctor_id, :subservice_id)";
+    runQuery($conn, $sql, [
+        'doctor_id' => $doctor_id,
+        'subservice_id' => $subservice_id
+    ]);
+    return true;
+}
+
 function createDoctor($conn, $data) {
     $sql = "INSERT INTO doctors (name, email, `rank`, gender, is_available, spec_id)
             VALUES (:name, :email, :rank, :gender, :is_available, :spec_id)";

@@ -22,6 +22,15 @@ function getSubServiceById($conn, $id) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function getDoctorsBySubService($conn, $subservice_id) {
+    $sql = "SELECT d.* 
+            FROM doctors d
+            INNER JOIN doctor_subservices ds ON d.id = ds.doctor_id
+            WHERE ds.subservice_id = :subservice_id AND d.deleted_at IS NULL";
+    $stmt = runQuery($conn, $sql, ['subservice_id' => $subservice_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function createSubService($conn, $data) {
     $sql = "INSERT INTO sub_services (name, fees, description) VALUES (:name, :fees, :description)";
     runQuery($conn, $sql, [

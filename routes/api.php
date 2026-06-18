@@ -84,6 +84,11 @@ switch ($module) {
     // ---------------------------------------------------------
     case 'doctors':
     case 'doctor':
+        if ($method === 'POST' && $action === 'assign-subservice') {
+            handleAssignSubService($conn);
+            break;
+        }
+        
         switch ($method) {
             case 'GET':     isset($_GET['id']) ? handleGetDoctorById($conn) : handleGetAllDoctors($conn); break;
             case 'POST':    handleCreateDoctor($conn); break;

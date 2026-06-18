@@ -59,8 +59,18 @@ function handleGetSubServiceById($conn) {
     $id = getRequiredId();
     $cacheKey = "subservice:" . $id;
 
+    $includeDoctors = isset($_GET['include_doctors']) && $_GET['include_doctors'] == '1';
+    if ($includeDoctors) {
+        $cacheKey .= ':with_doctors';
+    }
+
     serveFromCacheIfAvailable($cacheKey, "SubService fetched successfully");
     $data = getSubService($conn, $id);
+    
+    if ($includeDoctors) {
+        $data['doctors'] = getDoctorsBySubService($conn, $id);
+    }
+    
     saveToCache($cacheKey, $data);
 
     response(HttpStatus('OK'), "SubService fetched successfully", [

@@ -75,15 +75,59 @@ function handleGetDoctorById($conn) {
     $id = getRequiredId();
     $cacheKey = 'doctor:' . $id;
 
+    $includeSubservices = isset($_GET['include_subservices']) && $_GET['include_subservices'] == '1';
+    if ($includeSubservices) {
+        $cacheKey .= ':with_subservices';
+    }
+
     serveFromCacheIfAvailable($cacheKey, "Doctor fetched successfully");
 
     $doctor = getDoctor($conn, $id);
+    
+    if ($includeSubservices) {
+        $doctor['subservices'] = getDoctorSubServices($conn, $id);
+    }
+
     saveToCache($cacheKey, $doctor);
 
     response(HttpStatus('OK'), "Doctor fetched successfully", [
         'source' => 'database',
         'data' => $doctor
     ]);
+}
+
+function handleAssignSubService($conn) {
+    checkAdminPrivileges();
+    
+    $data = getJsonInput(['doctor_id', 'subservice_id']);
+    
+    if (!is_numeric($data['doctor_id']) || !is_numeric($data['subservice_id'])) {
+        response(HttpStatus('BAD_REQUEST'), "doctor_id and subservice_id must be numeric");
+    }
+    
+    // Verify entities exist
+    getDoctor($conn, $data['doctor_id']);
+    
+    // Verify subservice exists (we need to require SubServiceRepo here or just use a raw query, 
+    // but cleaner to just let the DB foreign key constraint handle it or do a manual check)
+    // Actually, let's just attempt to assign it. If FK fails, PDO will throw an exception 
+    // which our global exception handler will catch and return 500.
+    
+    assignSubServiceToDoctor($conn, $data['doctor_id'], $data['subservice_id']);
+    
+    // Invalidate caches
+    clearDoctorCache($data['doctor_id']);
+    // We also need to clear subservice cache since the relationship goes both ways
+    global $redis;
+    try {
+        $keys = $redis->keys('subservices:*');
+        $keys[] = 'subservice:' . $data['subservice_id'];
+        if (!empty($keys)) {
+            foreach ($keys as $key) $redis->del($key);
+        }
+    } catch (Exception $e) {}
+    
+    response(HttpStatus('CREATED'), "SubService assigned to doctor successfully");
 }
 
 function handleCreateDoctor($conn) {

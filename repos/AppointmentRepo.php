@@ -35,7 +35,22 @@ function createAppointment($conn, $data) {
         'user_id' => $data['user_id'],
         'doc_id' => $data['doc_id']
     ]);
-    return getAppointmentById($conn, $conn->lastInsertId());
+    
+    $appointmentId = $conn->lastInsertId();
+    
+    if (isset($data['subservice_ids']) && is_array($data['subservice_ids'])) {
+        foreach ($data['subservice_ids'] as $subservice_id) {
+            $sqlSub = "INSERT INTO appointment_subservice (appointment_id, subservice_id, prescription) 
+                       VALUES (:appointment_id, :subservice_id, :prescription)";
+            runQuery($conn, $sqlSub, [
+                'appointment_id' => $appointmentId,
+                'subservice_id' => $subservice_id,
+                'prescription' => '' // Default empty prescription
+            ]);
+        }
+    }
+    
+    return getAppointmentById($conn, $appointmentId);
 }
 
 function updateAppointment($conn, $id, $data) {
