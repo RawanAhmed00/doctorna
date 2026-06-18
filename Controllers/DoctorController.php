@@ -62,7 +62,7 @@ function handleGetAllDoctors($conn) {
 
     serveFromCacheIfAvailable($cacheKey, "Doctors fetched successfully");
 
-    $doctors = getAllDoctors($conn);
+    $doctors = getAllDoctorsWithSpeciality($conn);
     saveToCache($cacheKey, $doctors);
 
     response(HttpStatus('OK'), "Doctors fetched successfully", [
@@ -71,13 +71,21 @@ function handleGetAllDoctors($conn) {
     ]);
 }
 
+function getDoctorWithSpeciality($conn, $id) {
+    $doctor = getDoctorByIdWithSpeciality($conn, $id);
+    if (!$doctor) {
+        response(HttpStatus('NOT_FOUND'), "Doctor not found");
+    }
+    return $doctor;
+}
+
 function handleGetDoctorById($conn) {
     $id = getRequiredId();
     $cacheKey = 'doctor:' . $id;
 
     serveFromCacheIfAvailable($cacheKey, "Doctor fetched successfully");
 
-    $doctor = getDoctor($conn, $id);
+    $doctor = getDoctorWithSpeciality($conn, $id);
     saveToCache($cacheKey, $doctor);
 
     response(HttpStatus('OK'), "Doctor fetched successfully", [

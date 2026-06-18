@@ -10,8 +10,32 @@ function getAllDoctors($conn) {
     return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
+function getAllDoctorsWithSpeciality($conn) {
+    $sql = "SELECT d.*, s.name AS speciality_name, s.description AS speciality_description
+            FROM doctors d
+            LEFT JOIN speciality s ON d.spec_id = s.id AND s.deleted_at IS NULL
+            WHERE d.deleted_at IS NULL";
+
+    $operatorMap = [
+        'name'            => 'LIKE',
+        'speciality_name' => ['LIKE', 's.name'],
+        'spec_id'         => ['=', 'd.spec_id'],
+    ];
+    $filtered = applyFilters($sql, ['gender', 'rank', 'is_available', 'name', 'spec_id', 'speciality_name'], [], $operatorMap);
+    return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
+}
+
 function getDoctorById($conn, $id) {
     $sql = "SELECT * FROM doctors WHERE id = :id AND deleted_at IS NULL";
+    $stmt = runQuery($conn, $sql, ['id' => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function getDoctorByIdWithSpeciality($conn, $id) {
+    $sql = "SELECT d.*, s.name AS speciality_name, s.description AS speciality_description
+            FROM doctors d
+            LEFT JOIN speciality s ON d.spec_id = s.id AND s.deleted_at IS NULL
+            WHERE d.id = :id AND d.deleted_at IS NULL";
     $stmt = runQuery($conn, $sql, ['id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
