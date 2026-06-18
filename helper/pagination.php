@@ -1,5 +1,7 @@
 <?php
 // helper/pagination.php
+require_once __DIR__ . '/db.php';
+
 /*Pagintation concept: 
 
 Display Number ($limit) of Elemnts in one page
@@ -36,16 +38,11 @@ function paginateTable($conn, $tableName, $defaultLimit = 10) {
     }
 
     $countQuery = "SELECT COUNT(*) as total FROM `{$tableName}` WHERE deleted_at IS NULL";
-    $countStmt = $conn->prepare($countQuery);
-    $countStmt->execute();
+    $countStmt = runQuery($conn, $countQuery);
     $totalRecords = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-
-    $dataQuery = "SELECT * FROM `{$tableName}` WHERE deleted_at IS NULL ORDER BY id LIMIT :limit OFFSET :offset";
-    $dataStmt = $conn->prepare($dataQuery);
-    $dataStmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-    $dataStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-    $dataStmt->execute();
+    $dataQuery = "SELECT * FROM `{$tableName}` WHERE deleted_at IS NULL ORDER BY id LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+    $dataStmt = runQuery($conn, $dataQuery);
     $list = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
 
     //Total pages = totalrecords(rows we have in the table)/limit(no of rows in one page)
@@ -75,14 +72,12 @@ function paginateQuery($conn, $sql, $bindings = [], $defaultLimit = 10) {
 
     // Safely wrap the query to count total records
     $countQuery = "SELECT COUNT(*) as total FROM (" . $sql . ") as count_table";
-    $countStmt = $conn->prepare($countQuery);
-    $countStmt->execute($bindings);
+    $countStmt = runQuery($conn, $countQuery, $bindings);
     $totalRecords = (int)$countStmt->fetch(PDO::FETCH_ASSOC)["total"];
 
     // Append limit/offset for the actual data
     $dataQuery = $sql . " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
-    $dataStmt = $conn->prepare($dataQuery);
-    $dataStmt->execute($bindings);
+    $dataStmt = runQuery($conn, $dataQuery, $bindings);
     $list = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
 
     $totalPages = $limit > 0 ? ceil($totalRecords / $limit) : 0;
