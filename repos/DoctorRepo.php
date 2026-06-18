@@ -46,7 +46,7 @@ function updateDoctor($conn, $id, $data) {
     ]);
     return getDoctorById($conn, $id);
 }
-
+//$field -> IS THE VALUE THAT CHANGES DEPENDONG ON WHAT VALUE ADMIN WANT TO PATCH
 function patchDoctor($conn, $id, $field, $value) {
     $sql = "UPDATE doctors SET `$field` = :value WHERE id = :id AND deleted_at IS NULL";
     runQuery($conn, $sql, ['id' => $id, 'value' => $value]);

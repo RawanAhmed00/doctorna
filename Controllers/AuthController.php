@@ -25,33 +25,39 @@ function validatePasswordStrength($pass) {
 
 //1. repo which has function of getting user by email is done
 //then check mail,pass
+//LOGIN:
 function handleLogin($conn){
+    //GET USER EMAIL AND PASSWORD THEN STORE THEM
     $data = getJsonInput(['email', 'password']);
     $email = $data['email'];
     $pass = $data['password'];
-    
+
+    //VALIDATE EMAIL AND PASSWORD ENTERED:
+    //1.MAIL VALIDATION
     validateAuthEmail($email);
     
-    //8er kda:el mail sa7 so: get all mails from the function that gets all mails
+    //CHECKING IF EMAIL EXISTS IN DATABASE: BY CALLING THE FUNCTION THAT GETS ALL MAILS
     $user = getUserByEmail($conn, $email);
     
-    //kda b2a 3andy kil el mails:h ihave to make sure mail is in db
+    // IF MAIL DOES NOT EXIST: USER NOT FOUND IN DATABASE!
     if(!$user){
         response(HttpStatus('NOT_FOUND'), "User not Found, Please Register !");
     }
-    
-    //password turn:if pass != database pass
+
+    //IF PASSWORD IS NOT CORRECT COMPARED TO PASSWORD IN DATABASE: WRONG PASSWORD
     if(!password_verify($pass, $user['password'])){
         response(HttpStatus('UNAUTHORIZED'), "Wrong Password !");
     }
     
+    //GENERATING A TOKEN FOR THE USER:
     $token = GenerateToken($user);
     response(HttpStatus('OK'), "Logged in Successfully, Welcome !", ["token" => $token]);
 }
-
-//name, email ,password, gender, role
+//REGISTER FUNCTION:
+//NOTE: REGISTER FUNCTION IS APPLIED FOR USER ONLY! ADMIN IS NOT ALLOWED TO REGISTE
 function handleRegister($conn){
     $data = getJsonInput(['name', 'email', 'password', 'age', 'gender', 'phone', 'role']);
+    //USING strtolower(): TO MAKE SURE THE INPUT DATA WILL BE AS IN DATABASE TO BE ABLE TO BE STORE
     $data['gender'] = strtolower($data['gender'] ?? '');
     $data['role'] = strtolower($data['role'] ?? '');
     
@@ -64,14 +70,15 @@ function handleRegister($conn){
     $role = $data['role'] ?? '';
     
 
-    //if data empty: message you should insert data
+    //IF ANY FIELD OF DATA IS EMPTY, FILL IN ALL REQUIRED FIELDS
      if(empty($name) || empty($email) || empty($pass) || empty($age) ||empty($gender) || empty($phone) || empty($role)){
         response(HttpStatus('BAD_REQUEST'),"Please, Fill in all required fields !");
      }
-        
+    // THEN VALIDATE EMAIL, PASSWORD REGISTERED BY USER
     validateAuthEmail($email);
     validatePasswordStrength($pass);
 
+    //AGE CONDITIONS
     if (!is_numeric($age) || $age <= 0 || $age > 120) {
         response(HttpStatus('BAD_REQUEST'), "Age must be a valid positive number between 1 and 120 !");
     }
@@ -79,7 +86,10 @@ function handleRegister($conn){
     if (!in_array($gender, ['male', 'female'])) {
         response(HttpStatus('BAD_REQUEST'), "Gender must be either 'male' or 'female' !");
     }
-    
+
+    //MAKING SURE THAT AN EXISTING USER DOES NOT SIGN UP BY
+    // SEARCHING FOR 2 THINGS: EMAIL, PHONE NUMBER
+
     $existingUser = getUserByEmail($conn, $email);
     if($existingUser){
         response(HttpStatus('CONFLICT'), "Email Already Exists !");
@@ -89,12 +99,13 @@ function handleRegister($conn){
     if ($existingPhone) {
         response(HttpStatus('CONFLICT'), "Phone number already exists. Please use a different one.");
     }
-    
+    // AGAIN: USER IS ONLY ONE ALLOWED TO REGISTER OM THE SYSTEM
     if($role !== 'user'){
         response(HttpStatus('FORBIDDEN'), "You should be a user to register !");
     }
-    
+    //HASHING PASSWORD ENTERED BY USER
     $data['password'] = password_hash($pass, PASSWORD_DEFAULT);
+    //APPLYING THE REPO FUNCTION OF CREATING USER
     createUser($conn, $data);
     
     // Automatically log the user in by generating a token after registration

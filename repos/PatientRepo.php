@@ -5,7 +5,7 @@ require_once __DIR__ . '/../helper/filtration.php';
 require_once __DIR__ . '/../helper/pagination.php';
 
 function getAllPatients($conn) {
-    // Only return users with role='user'. Hide soft-deleted.
+    // Only return users with role = 'user. Hide soft-deleted.
     $sql = "SELECT id, name, email, age, gender, phone, role FROM users WHERE role = 'user' AND deleted_at IS NULL";
     
     $filtered = applyFilters($sql, ['gender', 'age', 'name'], [], ['name' => 'LIKE']);
@@ -30,7 +30,7 @@ function updatePatient($conn, $id, $data) {
     ]);
     return getPatientById($conn, $id);
 }
-
+// SOFTDELETE -> NOW(), TO DETERMINE THE TIME THAT USER WAS DELETED AT BY UPDATING ddeleted_at column
 function softDeletePatient($conn, $id) {
     $sql = "UPDATE users SET deleted_at = NOW() WHERE id = :id AND role = 'user' AND deleted_at IS NULL";
     runQuery($conn, $sql, ['id' => $id]);

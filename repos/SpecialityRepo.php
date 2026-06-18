@@ -6,7 +6,7 @@ require_once __DIR__ . '/../helper/pagination.php';
 
 function getAllSpecialities($conn) {
     $sql = "SELECT * FROM speciality WHERE deleted_at IS NULL";
-    // Allow filtering by name via LIKE
+    // Allow filtering of specialities by name via LIKE
     $filtered = applyFilters($sql, ['name'], [], ['name' => 'LIKE']);
     return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }

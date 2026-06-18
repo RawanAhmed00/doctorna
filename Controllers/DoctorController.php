@@ -12,19 +12,19 @@ function validateDoctorData($data) {
     if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
         response(HttpStatus('BAD_REQUEST'), "Invalid email format");
     }
-    
+    //MAKING SURE ADMIN ENTERS A VALID RANK
     if (isset($data['rank']) && !in_array(strtolower($data['rank']), ['intern', 'resident', 'specialist', 'senior specialist', 'consultant'])) {
         response(HttpStatus('BAD_REQUEST'), "Invalid rank. Allowed values: intern, resident, specialist, senior specialist, consultant");
     }
-
+    //MAKING SURE ADMIN ENTERS A VALID GENDER 
     if (isset($data['gender']) && !in_array(strtolower($data['gender']), ['male', 'female'])) {
         response(HttpStatus('BAD_REQUEST'), "Gender must be either 'male' or 'female'");
     }
-
+    //MAKING SURE ADMIN ENTERS A VALID AVAILABILITY
     if (isset($data['is_available']) && !in_array($data['is_available'], [0, 1, '0', '1', true, false], true)) {
         response(HttpStatus('BAD_REQUEST'), "is_available must be 0 or 1");
     }
-
+    //MAKING SURE ADMIN ENTERS A NUMERIC SPECIALITY ID
     if (isset($data['spec_id']) && !is_numeric($data['spec_id'])) {
         response(HttpStatus('BAD_REQUEST'), "spec_id must be a numeric ID");
     }
@@ -87,15 +87,16 @@ function handleGetDoctorById($conn) {
 }
 
 function handleCreateDoctor($conn) {
+    //TO MAKE SURE WHO IS PERFORMING THIS ACTION IS THE ADMIN
     checkAdminPrivileges();
 
     // Require all fields for creation
     $data = getJsonInput(['name', 'email', 'rank', 'gender', 'spec_id']);
-
+    //MAKING SURE ENTERED DATA FOR DOCTOR IS CORRECT 
     validateDoctorData($data);
-
+    //PERFORM CREATION
     $newDoctor = createDoctor($conn, $data);
-
+    //CLEARING PREVIOUS CACHE FOR DOCTORS, SO THE NEW INSRETED DDOCTOR WILL APPEAR
     clearDoctorCache();
 
     response(HttpStatus('CREATED'), "Doctor created successfully", $newDoctor);
@@ -113,12 +114,12 @@ function handleUpdateDoctor($conn) {
     validateDoctorData($data);
 
     $updatedDoctor = updateDoctor($conn, $id, $data);
-
+    //LIKE clearDoctorCache() BUT FOCUSING ON SPECEFIC DOCTOR WITH $id
     clearDoctorCache($id);
 
     response(HttpStatus('OK'), "Doctor updated successfully", $updatedDoctor);
 }
-
+//PATCH -> UPDATE A SPECEFIC FIELD
 function handlePatchDoctor($conn) {
     checkAdminPrivileges();
 
@@ -147,7 +148,7 @@ function handlePatchDoctor($conn) {
     if (!$updatedDoctor) {
         response(HttpStatus('BAD_REQUEST'), "Invalid fields provided");
     }
-
+    // IF WE DID NOT APPLY clearDoctorCache($id), OLD STATUS OF DOCTORS TABLE WILL REMAIN WHICH IS WRONG
     clearDoctorCache($id);
 
     response(HttpStatus('OK'), "Doctor patched successfully", $updatedDoctor);
