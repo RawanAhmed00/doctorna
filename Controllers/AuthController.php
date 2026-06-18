@@ -84,6 +84,11 @@ function handleRegister($conn){
     if($existingUser){
         response(HttpStatus('CONFLICT'), "Email Already Exists !");
     }
+
+    $existingPhone = getUserByPhone($conn, $phone);
+    if ($existingPhone) {
+        response(HttpStatus('CONFLICT'), "Phone number already exists. Please use a different one.");
+    }
     
     if($role !== 'user'){
         response(HttpStatus('FORBIDDEN'), "You should be a user to register !");

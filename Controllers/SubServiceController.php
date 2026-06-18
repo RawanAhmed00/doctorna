@@ -43,7 +43,7 @@ function handleGetAllSubServices($conn) {
     validateSubServiceData($_GET);
 
     // Build dynamic, sorted cache key automatically
-    $cacheKey = generateFilteredCacheKey('subservices', ['name', 'fees']);
+    $cacheKey = generateFilteredCacheKey('subservices', ['name', 'min_fees', 'max_fees']);
 
     serveFromCacheIfAvailable($cacheKey, "SubServices fetched successfully");
     $data = getAllSubServices($conn);

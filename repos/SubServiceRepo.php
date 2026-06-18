@@ -5,8 +5,25 @@ require_once __DIR__ . '/../helper/filtration.php';
 
 function getAllSubServices($conn) {
     $sql = "SELECT * FROM sub_services WHERE deleted_at IS NULL";
-    $filtered = applyFilters($sql, ['name', 'fees']);
-    $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
+    $bindings = [];
+
+    // Partial search for name
+    if (!empty($_GET['name'])) {
+        $sql .= " AND name LIKE :name";
+        $bindings[':name'] = '%' . $_GET['name'] . '%';
+    }
+
+    // Range filter for fees
+    if (isset($_GET['min_fees']) && $_GET['min_fees'] !== '') {
+        $sql .= " AND fees >= :min_fees";
+        $bindings[':min_fees'] = $_GET['min_fees'];
+    }
+    if (isset($_GET['max_fees']) && $_GET['max_fees'] !== '') {
+        $sql .= " AND fees <= :max_fees";
+        $bindings[':max_fees'] = $_GET['max_fees'];
+    }
+
+    $stmt = runQuery($conn, $sql, $bindings);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 

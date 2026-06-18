@@ -19,6 +19,12 @@ function getUserByEmail($conn, $email){
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function getUserByPhone($conn, $phone){
+    $sql = "SELECT * FROM `users` WHERE phone = :phone";
+    $stmt = runQuery($conn, $sql, ['phone' => $phone]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 //2.signup
 function createUser($conn, $data){
     $sql = "INSERT INTO `users` (name, email, password, age, gender, phone, role) 
