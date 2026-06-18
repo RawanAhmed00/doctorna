@@ -87,7 +87,7 @@ switch ($module) {
         switch ($method) {
             case 'GET':     isset($_GET['id']) ? handleGetDoctorById($conn) : handleGetAllDoctors($conn); break;
             case 'POST':    handleCreateDoctor($conn); break;
-            case 'PUT':
+            case 'PUT':     handlePatchDoctor($conn); break;
             case 'PATCH':   handleUpdateDoctor($conn); break;
             case 'DELETE':  handleDeleteDoctor($conn); break;
             default:        methodNotAllowed();
