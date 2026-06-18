@@ -5,6 +5,7 @@ require_once __DIR__ . '/env.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/status.php';
 require_once __DIR__ . '/response.php';
+
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
