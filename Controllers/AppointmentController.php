@@ -37,6 +37,17 @@ function validateAppointmentData(&$data) {
     if (isset($data['spec_id']) && $data['spec_id'] !== null && !is_numeric($data['spec_id'])) {
         response(HttpStatus('BAD_REQUEST'), "Invalid spec_id. Must be numeric.");
     }
+
+    if (isset($data['type'])) {
+        $data['type'] = strtolower($data['type']);
+        if (!in_array($data['type'], ['consultation', 'procedure'], true)) {
+            response(HttpStatus('BAD_REQUEST'), "Invalid type. Allowed: consultation, procedure");
+        }
+    }
+
+    if (isset($data['parent_id']) && $data['parent_id'] !== null && !is_numeric($data['parent_id'])) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid parent_id. Must be numeric.");
+    }
 }
 
 function getAppointment($conn, $id) {
@@ -81,39 +92,79 @@ function handleCreateAppointment($conn) {
         response(HttpStatus('FORBIDDEN'), "Only users can book appointments");
     }
 
-    // subservice_ids is optional, but if provided must be an array
     $data = getJsonInput(['status', 'date_time', 'doc_id']);
-    
-    // If spec_id not provided, auto-populate from doctor's spec_id
-    require_once __DIR__ . '/../repos/DoctorRepo.php';
-    if (!isset($data['spec_id'])) {
-        $doctor = getDoctorById($conn, $data['doc_id']);
-        $data['spec_id'] = $doctor ? $doctor['spec_id'] : null;
-    }
-    
-    // Check if body has subservice_ids
     $rawBody = json_decode(file_get_contents("php://input"), true) ?? [];
-    if (isset($rawBody['subservice_ids'])) {
-        if (!is_array($rawBody['subservice_ids'])) {
-            response(HttpStatus('BAD_REQUEST'), "subservice_ids must be an array");
+    
+    $data['type'] = isset($rawBody['type']) ? strtolower($rawBody['type']) : 'consultation';
+    $data['parent_id'] = $rawBody['parent_id'] ?? null;
+    
+    require_once __DIR__ . '/../repos/DoctorRepo.php';
+
+    if ($data['type'] === 'procedure') {
+        // Procedure: requires parent consultation + subservices
+        if (empty($data['parent_id'])) {
+            response(HttpStatus('BAD_REQUEST'), "Procedure appointments require a parent_id linking to a consultation");
+        }
+        
+        // Validate parent exists and is a consultation
+        $parent = getAppointmentById($conn, $data['parent_id']);
+        if (!$parent) {
+            response(HttpStatus('BAD_REQUEST'), "Parent appointment not found");
+        }
+        if ($parent['type'] !== 'consultation') {
+            response(HttpStatus('BAD_REQUEST'), "Parent appointment must be a consultation (type=consultation)");
+        }
+        
+        // Inherit spec_id from parent consultation if not explicitly set
+        if (!isset($rawBody['spec_id'])) {
+            $data['spec_id'] = $parent['spec_id'];
+        }
+        
+        // Procedure requires at least one subservice
+        if (!isset($rawBody['subservice_ids']) || !is_array($rawBody['subservice_ids']) || empty($rawBody['subservice_ids'])) {
+            response(HttpStatus('BAD_REQUEST'), "Procedure appointments require at least one subservice_id");
         }
         $data['subservice_ids'] = $rawBody['subservice_ids'];
         
-        // Validation Rule: Does this doctor actually offer these subservices?
-        // We fetch the doctor's capabilities from doctor_subservices
+        // Validate all subservices are offered by this doctor
         $doctorOffers = getDoctorSubServices($conn, $data['doc_id']);
         $offeredIds = array_column($doctorOffers, 'id');
-        
         foreach ($data['subservice_ids'] as $requested_id) {
             if (!in_array($requested_id, $offeredIds)) {
                 response(HttpStatus('BAD_REQUEST'), "The selected doctor does not offer subservice ID: $requested_id");
             }
         }
+    } else {
+        // Consultation: subservice_ids optional, parent_id not allowed
+        if ($data['parent_id']) {
+            response(HttpStatus('BAD_REQUEST'), "Consultation appointments cannot have a parent_id");
+        }
+        $data['parent_id'] = null;
+        
+        // Auto-populate spec_id from doctor
+        if (!isset($rawBody['spec_id'])) {
+            $doctor = getDoctorById($conn, $data['doc_id']);
+            $data['spec_id'] = $doctor ? $doctor['spec_id'] : null;
+        }
+        
+        // Optional subservice_ids
+        if (isset($rawBody['subservice_ids'])) {
+            if (!is_array($rawBody['subservice_ids'])) {
+                response(HttpStatus('BAD_REQUEST'), "subservice_ids must be an array");
+            }
+            $data['subservice_ids'] = $rawBody['subservice_ids'];
+            $doctorOffers = getDoctorSubServices($conn, $data['doc_id']);
+            $offeredIds = array_column($doctorOffers, 'id');
+            foreach ($data['subservice_ids'] as $requested_id) {
+                if (!in_array($requested_id, $offeredIds)) {
+                    response(HttpStatus('BAD_REQUEST'), "The selected doctor does not offer subservice ID: $requested_id");
+                }
+            }
+        }
     }
     
     validateAppointmentData($data);
-
-    $data['user_id'] = $token->user_id; // Securely take from token
+    $data['user_id'] = $token->user_id;
 
     $newAppointment = createAppointment($conn, $data);
     
@@ -126,7 +177,8 @@ function handleCreateAppointment($conn) {
         }
     } catch (Exception $e) {}
     
-    response(HttpStatus('CREATED'), "Appointment booked successfully", $newAppointment);
+    $msg = $data['type'] === 'procedure' ? "Procedure booked successfully" : "Appointment booked successfully";
+    response(HttpStatus('CREATED'), $msg, $newAppointment);
 }
 
 function handleUpdateAppointment($conn) {
@@ -148,7 +200,9 @@ function handleUpdateAppointment($conn) {
         'date_time' => $data['date_time'] ?? $appointment['date_time'],
         'user_id' => $data['user_id'] ?? $appointment['user_id'],
         'doc_id' => $data['doc_id'] ?? $appointment['doc_id'],
-        'spec_id' => array_key_exists('spec_id', $data) ? $data['spec_id'] : $appointment['spec_id']
+        'spec_id' => array_key_exists('spec_id', $data) ? $data['spec_id'] : $appointment['spec_id'],
+        'type' => array_key_exists('type', $data) ? $data['type'] : $appointment['type'],
+        'parent_id' => array_key_exists('parent_id', $data) ? $data['parent_id'] : $appointment['parent_id']
     ];
 
     validateAppointmentData($updateData);

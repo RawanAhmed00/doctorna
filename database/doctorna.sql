@@ -34,6 +34,8 @@ CREATE TABLE `appointments` (
   `user_id` int(12) NOT NULL,
   `doc_id` int(12) NOT NULL,
   `spec_id` int(12) DEFAULT NULL,
+  `type` enum('consultation','procedure') NOT NULL DEFAULT 'consultation',
+  `parent_id` int(12) DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -41,10 +43,10 @@ CREATE TABLE `appointments` (
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`id`, `status`, `date_time`, `user_id`, `doc_id`, `spec_id`) VALUES
-(1, 'pending', '2026-06-15 10:00:00', 1, 3, NULL),
-(2, 'confirmed', '2026-06-15 12:30:00', 2, 5, NULL),
-(3, 'completed', '2026-06-10 09:00:00', 3, 1, NULL),
+INSERT INTO `appointments` (`id`, `status`, `date_time`, `user_id`, `doc_id`, `spec_id`, `type`) VALUES
+(1, 'pending', '2026-06-15 10:00:00', 1, 3, NULL, 'consultation'),
+(2, 'confirmed', '2026-06-15 12:30:00', 2, 5, NULL, 'consultation'),
+(3, 'completed', '2026-06-10 09:00:00', 3, 1, NULL, 'consultation'),
 (4, 'cancelled', '2026-06-11 14:00:00', 4, 2),
 (5, 'confirmed', '2026-06-16 11:00:00', 5, 10),
 (6, 'pending', '2026-06-16 16:15:00', 6, 7),
@@ -462,7 +464,8 @@ ALTER TABLE `appointments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_app_user` (`user_id`),
   ADD KEY `fk_app_doc` (`doc_id`),
-  ADD KEY `fk_app_spec` (`spec_id`);
+  ADD KEY `fk_app_spec` (`spec_id`),
+  ADD KEY `fk_app_parent` (`parent_id`);
 
 --
 -- Indexes for table `appointment_subservice`
@@ -539,7 +542,8 @@ ALTER TABLE `users`
 --
 ALTER TABLE `appointments`
   ADD CONSTRAINT `fk_app_doc` FOREIGN KEY (`doc_id`) REFERENCES `doctors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_app_spec` FOREIGN KEY (`spec_id`) REFERENCES `speciality` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_app_spec` FOREIGN KEY (`spec_id`) REFERENCES `speciality` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_app_parent` FOREIGN KEY (`parent_id`) REFERENCES `appointments` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `appointment_subservice`

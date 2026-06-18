@@ -30,8 +30,9 @@ function getAllAppointments($conn) {
         'doc_id'   => ['=', 'a.doc_id'],
         'user_id'  => ['=', 'a.user_id'],
         'spec_id'  => ['=', 'a.spec_id'],
+        'type'     => ['=', 'a.type'],
     ];
-    $filtered = applyFilters($sql, ['status', 'date_time', 'doc_id', 'user_id', 'spec_id'], [], $operatorMap);
+    $filtered = applyFilters($sql, ['status', 'date_time', 'doc_id', 'user_id', 'spec_id', 'type'], [], $operatorMap);
     return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
@@ -48,20 +49,23 @@ function getAppointmentsByUserId($conn, $user_id) {
         'date_time'=> ['=', 'a.date_time'],
         'doc_id'   => ['=', 'a.doc_id'],
         'spec_id'  => ['=', 'a.spec_id'],
+        'type'     => ['=', 'a.type'],
     ];
-    $filtered = applyFilters($sql, ['status', 'date_time', 'doc_id', 'spec_id'], ['user_id' => $user_id], $operatorMap);
+    $filtered = applyFilters($sql, ['status', 'date_time', 'doc_id', 'spec_id', 'type'], ['user_id' => $user_id], $operatorMap);
     return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
 function createAppointment($conn, $data) {
-    $sql = "INSERT INTO appointments (status, date_time, user_id, doc_id, spec_id) 
-            VALUES (:status, :date_time, :user_id, :doc_id, :spec_id)";
+    $sql = "INSERT INTO appointments (status, date_time, user_id, doc_id, spec_id, type, parent_id) 
+            VALUES (:status, :date_time, :user_id, :doc_id, :spec_id, :type, :parent_id)";
     runQuery($conn, $sql, [
         'status' => $data['status'],
         'date_time' => $data['date_time'],
         'user_id' => $data['user_id'],
         'doc_id' => $data['doc_id'],
-        'spec_id' => $data['spec_id'] ?? null
+        'spec_id' => $data['spec_id'] ?? null,
+        'type' => $data['type'] ?? 'consultation',
+        'parent_id' => $data['parent_id'] ?? null
     ]);
     
     $appointmentId = $conn->lastInsertId();
@@ -83,7 +87,8 @@ function createAppointment($conn, $data) {
 
 function updateAppointment($conn, $id, $data) {
     $sql = "UPDATE appointments 
-            SET status = :status, date_time = :date_time, user_id = :user_id, doc_id = :doc_id, spec_id = :spec_id
+            SET status = :status, date_time = :date_time, user_id = :user_id, doc_id = :doc_id, spec_id = :spec_id,
+                type = :type, parent_id = :parent_id
             WHERE id = :id";
     runQuery($conn, $sql, [
         'id' => $id,
@@ -91,7 +96,9 @@ function updateAppointment($conn, $id, $data) {
         'date_time' => $data['date_time'],
         'user_id' => $data['user_id'],
         'doc_id' => $data['doc_id'],
-        'spec_id' => $data['spec_id'] ?? null
+        'spec_id' => $data['spec_id'] ?? null,
+        'type' => $data['type'] ?? 'consultation',
+        'parent_id' => $data['parent_id'] ?? null
     ]);
     return getAppointmentById($conn, $id);
 }
