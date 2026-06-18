@@ -33,6 +33,10 @@ function validateAppointmentData(&$data) {
     if (isset($data['user_id']) && !is_numeric($data['user_id'])) {
         response(HttpStatus('BAD_REQUEST'), "Invalid user_id. Must be numeric.");
     }
+
+    if (isset($data['spec_id']) && $data['spec_id'] !== null && !is_numeric($data['spec_id'])) {
+        response(HttpStatus('BAD_REQUEST'), "Invalid spec_id. Must be numeric.");
+    }
 }
 
 function getAppointment($conn, $id) {
@@ -80,6 +84,13 @@ function handleCreateAppointment($conn) {
     // subservice_ids is optional, but if provided must be an array
     $data = getJsonInput(['status', 'date_time', 'doc_id']);
     
+    // If spec_id not provided, auto-populate from doctor's spec_id
+    require_once __DIR__ . '/../repos/DoctorRepo.php';
+    if (!isset($data['spec_id'])) {
+        $doctor = getDoctorById($conn, $data['doc_id']);
+        $data['spec_id'] = $doctor ? $doctor['spec_id'] : null;
+    }
+    
     // Check if body has subservice_ids
     $rawBody = json_decode(file_get_contents("php://input"), true) ?? [];
     if (isset($rawBody['subservice_ids'])) {
@@ -90,7 +101,6 @@ function handleCreateAppointment($conn) {
         
         // Validation Rule: Does this doctor actually offer these subservices?
         // We fetch the doctor's capabilities from doctor_subservices
-        require_once __DIR__ . '/../repos/DoctorRepo.php';
         $doctorOffers = getDoctorSubServices($conn, $data['doc_id']);
         $offeredIds = array_column($doctorOffers, 'id');
         
@@ -137,7 +147,8 @@ function handleUpdateAppointment($conn) {
         'status' => $data['status'] ?? $appointment['status'],
         'date_time' => $data['date_time'] ?? $appointment['date_time'],
         'user_id' => $data['user_id'] ?? $appointment['user_id'],
-        'doc_id' => $data['doc_id'] ?? $appointment['doc_id']
+        'doc_id' => $data['doc_id'] ?? $appointment['doc_id'],
+        'spec_id' => array_key_exists('spec_id', $data) ? $data['spec_id'] : $appointment['spec_id']
     ];
 
     validateAppointmentData($updateData);

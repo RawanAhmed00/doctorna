@@ -33,6 +33,7 @@ CREATE TABLE `appointments` (
   `date_time` datetime NOT NULL,
   `user_id` int(12) NOT NULL,
   `doc_id` int(12) NOT NULL,
+  `spec_id` int(12) DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -40,10 +41,10 @@ CREATE TABLE `appointments` (
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`id`, `status`, `date_time`, `user_id`, `doc_id`) VALUES
-(1, 'pending', '2026-06-15 10:00:00', 1, 3),
-(2, 'confirmed', '2026-06-15 12:30:00', 2, 5),
-(3, 'completed', '2026-06-10 09:00:00', 3, 1),
+INSERT INTO `appointments` (`id`, `status`, `date_time`, `user_id`, `doc_id`, `spec_id`) VALUES
+(1, 'pending', '2026-06-15 10:00:00', 1, 3, NULL),
+(2, 'confirmed', '2026-06-15 12:30:00', 2, 5, NULL),
+(3, 'completed', '2026-06-10 09:00:00', 3, 1, NULL),
 (4, 'cancelled', '2026-06-11 14:00:00', 4, 2),
 (5, 'confirmed', '2026-06-16 11:00:00', 5, 10),
 (6, 'pending', '2026-06-16 16:15:00', 6, 7),
@@ -460,7 +461,8 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `age`, `gender`, `phone`
 ALTER TABLE `appointments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_app_user` (`user_id`),
-  ADD KEY `fk_app_doc` (`doc_id`);
+  ADD KEY `fk_app_doc` (`doc_id`),
+  ADD KEY `fk_app_spec` (`spec_id`);
 
 --
 -- Indexes for table `appointment_subservice`
@@ -536,7 +538,8 @@ ALTER TABLE `users`
 -- Constraints for table `appointments`
 --
 ALTER TABLE `appointments`
-  ADD CONSTRAINT `fk_app_doc` FOREIGN KEY (`doc_id`) REFERENCES `doctors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_app_doc` FOREIGN KEY (`doc_id`) REFERENCES `doctors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_app_spec` FOREIGN KEY (`spec_id`) REFERENCES `speciality` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `appointment_subservice`
@@ -550,6 +553,42 @@ ALTER TABLE `appointment_subservice`
 --
 ALTER TABLE `doctors`
   ADD CONSTRAINT `fk_doc_spec` FOREIGN KEY (`spec_id`) REFERENCES `speciality` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Table structure for table `doctor_subservices`
+--
+
+CREATE TABLE IF NOT EXISTS `doctor_subservices` (
+  `id` int(12) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(12) NOT NULL,
+  `subservice_id` int(12) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_offer` (`doctor_id`,`subservice_id`),
+  KEY `fk_ds_doctor` (`doctor_id`),
+  KEY `fk_ds_subservice` (`subservice_id`),
+  CONSTRAINT `fk_ds_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_ds_subservice` FOREIGN KEY (`subservice_id`) REFERENCES `sub_services` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `doctor_subservices`
+--
+
+INSERT IGNORE INTO `doctor_subservices` (`doctor_id`, `subservice_id`) VALUES
+(1, 1), (1, 2), (1, 3), (1, 4),
+(2, 5), (2, 6), (2, 7),
+(3, 8), (3, 9), (3, 10),
+(4, 11), (4, 12),
+(5, 13), (5, 14), (5, 15),
+(6, 16), (6, 17),
+(7, 18), (7, 19), (7, 20),
+(8, 21), (8, 22),
+(51, 1), (51, 2), (51, 5),
+(52, 10), (52, 11),
+(53, 30), (53, 31),
+(54, 40), (54, 41);
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

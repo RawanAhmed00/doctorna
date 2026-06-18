@@ -4,16 +4,42 @@ require_once __DIR__ . '/../helper/db.php';
 require_once __DIR__ . '/../helper/filtration.php';
 
 function getAllDoctors($conn) {
-    $sql = "SELECT * FROM doctors WHERE deleted_at IS NULL";
-    
-    $filtered = applyFilters($sql, ['gender', 'rank', 'is_available', 'name'], [], ['name' => 'LIKE']);
+    $bindings = [];
+    $sql = "SELECT d.*, s.name AS speciality_name, s.description AS speciality_description,
+                   (SELECT GROUP_CONCAT(ss2.name ORDER BY ss2.id SEPARATOR ', ')
+                    FROM doctor_subservices ds2
+                    JOIN sub_services ss2 ON ss2.id = ds2.subservice_id
+                    WHERE ds2.doctor_id = d.id) AS subservice_names
+            FROM doctors d
+            LEFT JOIN speciality s ON s.id = d.spec_id
+            WHERE d.deleted_at IS NULL";
+
+    // Handle subservice_id filter — uses WHERE IN to avoid breaking GROUP_CONCAT
+    if (isset($_GET['subservice_id']) && is_numeric($_GET['subservice_id'])) {
+        $sql .= " AND d.id IN (SELECT doctor_id FROM doctor_subservices WHERE subservice_id = :filter_subservice_id)";
+        $bindings[':filter_subservice_id'] = (int)$_GET['subservice_id'];
+    }
+
+    $filtered = applyFilters($sql, ['gender', 'rank', 'is_available', 'name', 'spec_id'], $bindings, ['name' => 'LIKE']);
     return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
 function getDoctorById($conn, $id) {
-    $sql = "SELECT * FROM doctors WHERE id = :id AND deleted_at IS NULL";
+    $sql = "SELECT d.*, s.name AS speciality_name, s.description AS speciality_description,
+                   (SELECT GROUP_CONCAT(ss2.name ORDER BY ss2.id SEPARATOR ', ')
+                    FROM doctor_subservices ds2
+                    JOIN sub_services ss2 ON ss2.id = ds2.subservice_id
+                    WHERE ds2.doctor_id = d.id) AS subservice_names
+            FROM doctors d
+            LEFT JOIN speciality s ON s.id = d.spec_id
+            WHERE d.id = :id AND d.deleted_at IS NULL";
     $stmt = runQuery($conn, $sql, ['id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function getDoctorWithAllRelations($conn, $id) {
+    // Same as getDoctorById — all enrichments already inlined
+    return getDoctorById($conn, $id);
 }
 
 function getDoctorSubServices($conn, $doctor_id) {

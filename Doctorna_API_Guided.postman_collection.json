@@ -1,13 +1,13 @@
 {
     "info": {
-        "name": "Doctorna API v2 (Minimal & Clean)",
-        "description": "# Doctorna API v2\n\nThis collection has been strictly optimized. All redundant endpoints have been removed. \n\n## 🔍 How Filtering Works\nOur API is smart. You do **not** need to hit separate \"filter\" endpoints or send custom headers.\n\nTo filter data, simply add query parameters to any `GET` request!\n\n**Examples:**\n- `GET /doctors` -> Returns all doctors.\n- `GET /doctors?gender=female&rank=specialist` -> Automatically returns filtered doctors.\n- `GET /specialities?name=Dentist` -> Returns specific specialities.\n- `GET /appointments?status=pending` -> Returns pending appointments.\n\n## 📊 Bonus Features (Query Flags)\n- `GET /specialities?id=1&include_doctors=1` -> Appends a `doctors_count` field to the speciality response.\n\n## 📄 Global Pagination\nAll GET All endpoints now support global server-side pagination via ?page=1&limit=10. The response includes list and pagination metadata (\total_records, has_next, etc.).",
+        "name": "Doctorna API v2 (Guided — Smart Usage)",
+        "description": "# Doctorna API v2 — Smart Usage Guide\n\nThis collection is your full toolkit for the Doctorna healthcare booking system.\nEvery endpoint is ready to use. Here's how to work smart.\n\n---\n\n## 🧠 The Big Picture — How Modules Connect\n\n```\nSpecialities  ──→  Doctors  ──→  SubServices  ──→  Appointments\n    │                   │                            │\n    │   ?spec_id=1      │   ?subservice_id=5         │  subservice_ids:[1,2]\n    │   filters docs    │   filters docs by offer     │  Smart Booking validation\n    └───────────────────┴────────────────────────────┘\n```\n\n1. **Specialities** are categories (Cardiology, Dermatology…)\n2. **Doctors** belong to a speciality (`spec_id`). Each doctor can **offer** multiple subservices.\n3. **SubServices** are procedures a doctor performs. Link them via `POST /doctors/assign-subservice`.\n4. **Appointments** tie it all together — pick a doctor, pick subservices they offer, book.\n\n---\n\n## 🔍 Smart Filtering (All GET All Endpoints)\n\nDon't build separate filter UIs. Just add query params:\n\n| Query Param | Example | Works On |\n|---|---|---|\n| `?gender=female` | `/doctors?gender=female` | Doctors |\n| `?rank=consultant` | `/doctors?rank=consultant` | Doctors |\n| `?spec_id=2` | `/doctors?spec_id=2` | Doctors (filter by speciality) |\n| `?subservice_id=5` | `/doctors?subservice_id=5` | Doctors (who offer this subservice) |\n| `?name=Ahmed` | `/doctors?name=Ahmed` | Doctors, Patients, Specialities, SubServices (LIKE) |\n| `?status=pending` | `/appointments?status=pending` | Appointments |\n| `?min_fees=100&max_fees=500` | `/subservices?min_fees=100` | SubServices |\n\nCombine them: `/doctors?gender=female&rank=specialist&spec_id=1&subservice_id=3`\n\n---\n\n## 🚩 Bonus Query Flags (GET by ID)\n\n| Flag | Endpoint | Effect |\n|---|---|---|\n| `?include_subservices=1` | `GET /doctors?id=X` | Returns doctor's offered subservices |\n| `?include_all=1` | `GET /doctors?id=X` | Full profile: speciality name, description + subservices |\n| `?include_doctors=1` | `GET /specialities?id=X` | Appends `doctors_count` |\n| `?include_doctors=1` | `GET /subservices?id=X` | Returns doctors who offer this subservice |\n\n---\n\n## 📄 Pagination (All GET All)\n\n`/doctors?page=1&limit=10`\n\nResponse shape:\n```json\n{\n  \"list\": [...],\n  \"pagination\": {\n    \"current_page\": 1,\n    \"per_page\": 10,\n    \"total_records\": 56,\n    \"total_pages\": 6,\n    \"has_next\": true,\n    \"has_prev\": false\n  }\n}\n```\n\n---\n\n## 🔐 Auth Quick Start\n\n1. **Register** → get JWT token (auto-login on register)\n2. **Login** → get JWT token\n3. Set `{{user_token}}` or `{{admin_token}}` variable in Postman\n4. ✅ Authenticated requests use `Authorization: Bearer <token>`\n\n**Built-in admin accounts** (for testing):\n- `mohamed.omar@example.com` / `doctor#1`\n- `hany.y@example.com` / `hany_secure`\n\n**Built-in user accounts** (for testing):\n- `ahmed.ali@example.com` / `pass1234`\n- `sara.hassan@example.com` / `sara@2026`\n\n---\n\n## 🗺️ Collection Structure\n\n| Folder | Endpoints | Auth Required |\n|---|---|---|\n| 1. Authentication | Register, Login, Forgot/Reset Password | Public |\n| 2. Doctors | CRUD + Assign SubService + Filter | Public GET, Admin write |\n| 3. Appointments | CRUD + Smart Booking | User GET/POST, Admin GET/PATCH |\n| 4. Patients | CRUD + Filter | Admin only |\n| 5. Specialities | CRUD + Filter | Public GET, Admin write |\n| 6. SubServices | CRUD + Filter | Public GET, Admin write |\n\n---\n\n## ⚡ Pro Tips\n\n- **Response enrichment is built-in**: every GET endpoint JOINs related tables — see individual endpoint descriptions for which fields are added. Appointments now include `speciality_name` via LEFT JOIN on `spec_id`.\n- **Cache invalidation is automatic**: writing to a module clears its Redis cache keys.\n- **Soft deletes** for Doctors, Patients, Specialities (`deleted_at`). SubServices use hard delete.\n- **All error responses** are JSON: `{\"status_code\": 400, \"message\": \"...\"}`.\n- **Rate yourself**: use `?limit=100` max. Larger values are clamped.\n- **Postman variables**: set `base_url`, `admin_token`, `user_token` once, use everywhere.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
             "name": "1. Authentication",
-            "description": "Endpoints for user registration, login, and password recovery.",
+            "description": "## Authentication — Get Your Token\n\n**Flow:**\n1. **Register** → creates account + returns JWT (auto-login)\n2. **Login** → returns JWT for existing accounts\n3. Use the token in `Authorization: Bearer <token>` header for protected endpoints\n\n**Tokens encode** `user_id` and `role` (user/admin). The API reads these from the token — never trust client-supplied IDs.\n\n**Password Reset:**\n- `forgot-password`: sends email with reset token (requires SMTP configured)\n- `reset-password`: consumes the token + sets new password\n\n> 💡 Copy the token from Login response and paste into the `{{user_token}}` or `{{admin_token}}` variable.",
             "item": [
                 {
                     "name": "Register (Public)",
@@ -34,7 +34,8 @@
                                 "register"
                             ]
                         }
-                    }
+                    },
+                    "description": "## Register — Create Account\n\nCreates a new user. Returns JWT token immediately (auto-login).\n\n**Smart defaults:**\n- `role`: use `\"user\"` for patients, `\"admin\"` for staff\n- `phone`: must be unique (prevents duplicate accounts)\n- `age`: optional numeric\n- `gender`: `\"male\"` or `\"female\"`\n\n**Response:** 201 + JWT token in `data.token`. No need to call Login after Register.\n\n> ⚠️ If you get 409 \"Phone number already exists\", use a different phone."
                 },
                 {
                     "name": "Login (Public)",
@@ -61,7 +62,8 @@
                                 "login"
                             ]
                         }
-                    }
+                    },
+                    "description": "## Login — Get JWT Token\n\nAuthenticate with email + password. Returns JWT token.\n\n**Token lifetime:** 1 hour (configurable in helper/JWT.php).\n\n**After login:**\n1. Copy the `token` value from response\n2. Click the eye icon 👁️ next to \"6. SubServices\" folder name\n3. Set `admin_token` or `user_token` variable\n4. All protected requests will use it automatically\n\n> 🔑 Pre-seeded accounts:\n> - **Admin:** mohamed.omar@example.com / doctor#1\n> - **User:** ahmed.ali@example.com / pass1234"
                 },
                 {
                     "name": "Forgot Password (Public)",
@@ -88,7 +90,8 @@
                                 "forgot-password"
                             ]
                         }
-                    }
+                    },
+                    "description": "## Forgot Password — Request Reset Token\n\nSends a password reset email to the given address.\n\n**Requires:** SMTP configured in `config/mail.php`. The email contains a reset token.\n\n**Next step:** Check the recipient email, copy the token, call `Reset Password`."
                 },
                 {
                     "name": "Reset Password (Public)",
@@ -115,7 +118,8 @@
                                 "reset-password"
                             ]
                         }
-                    }
+                    },
+                    "description": "## Reset Password — Set New Password\n\nConsumes the reset token and sets a new password.\n\n**Parameters:**\n- `email`: same email used in Forgot Password\n- `token`: the token received via email\n- `new_password`: new password (will be hashed with PASSWORD_DEFAULT)\n\n> 💡 For testing without SMTP, check the `password_resets` table directly for the token."
                 }
             ]
         },
@@ -156,6 +160,18 @@
                                     "description": "Optional: 0 or 1"
                                 },
                                 {
+                                    "key": "spec_id",
+                                    "value": "1",
+                                    "disabled": true,
+                                    "description": "Optional: Filter by speciality ID"
+                                },
+                                {
+                                    "key": "subservice_id",
+                                    "value": "5",
+                                    "disabled": true,
+                                    "description": "Optional: Filter doctors who offer this subservice"
+                                },
+                                {
                                     "key": "page",
                                     "value": "1",
                                     "disabled": false,
@@ -168,9 +184,9 @@
                                     "description": "Pagination: Items per page"
                                 }
                             ]
-                        },
-                        "description": "Fetch all doctors. Check the 'Params' tab in Postman to easily toggle optional filters on/off!"
-                    }
+                        }
+                    },
+                    "description": "## 🔍 Smart Filter — Doctors\n\nFetch all doctors with optional filters. **Check the \"Params\" tab** to enable/disable any filter.\n\n**Available filters:**\n\n| Param | Example | Behavior |\n|---|---|---|\n| `gender` | `?gender=female` | Exact match |\n| `rank` | `?rank=consultant` | Exact match |\n| `is_available` | `?is_available=1` | 0 or 1 |\n| `name` | `?name=Ahmed` | LIKE search (partial match) |\n| `spec_id` | `?spec_id=2` | Filter by speciality |\n| `subservice_id` | `?subservice_id=5` | Only doctors who offer this subservice |\n| `page` | `?page=2` | Pagination |\n| `limit` | `?limit=20` | Items per page (max 100) |\n\n**💡 Smart tip:** Combine `spec_id` + `subservice_id` to find \"Cardiology specialists who perform Carotid Doppler\".\nExample: `?spec_id=1&subservice_id=5`\n\n**Response — every doctor now includes enriched fields:**\n```json\n{\n  \"id\": 1,\n  \"name\": \"Dr. Ahmed Tyson\",\n  \"rank\": \"senior specialist\",\n  \"speciality_name\": \"Pediatrics\",\n  \"subservice_names\": \"Echocardiogram, ECG Rhythm Test, Stress ECG Test, Holter Monitor\",\n  \"gender\": \"male\"\n}\n```\n> 💡 `speciality_name` comes from LEFT JOIN on `speciality` table. `subservice_names` is a correlated subquery — always present, zero extra API calls."
                 },
                 {
                     "name": "Get Doctor by ID (Public)",
@@ -178,7 +194,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api.php/doctors?id=1",
+                            "raw": "{{base_url}}/api.php/doctors",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -189,11 +205,63 @@
                             "query": [
                                 {
                                     "key": "id",
-                                    "value": "1"
+                                    "value": "1",
+                                    "description": "Doctor ID"
+                                },
+                                {
+                                    "key": "include_subservices",
+                                    "value": "1",
+                                    "disabled": true,
+                                    "description": "Set to 1 to include assigned subservices"
+                                },
+                                {
+                                    "key": "include_all",
+                                    "value": "1",
+                                    "disabled": true,
+                                    "description": "Set to 1 to get full profile: speciality + subservices"
                                 }
                             ]
                         }
-                    }
+                    },
+                    "description": "## 🚩 Doctor Detail — Full Profile Flags\n\nGet full details for a single doctor. **Every response now includes:**\n- `speciality_name` — from LEFT JOIN on `speciality`\n- `speciality_description` — same JOIN\n- `subservice_names` — comma-separated via correlated subquery\n\n**Bonus flags:**\n- `?include_subservices=1` → appends `subservices` array (with IDs, fees, description)\n- `?include_all=1` → full profile: speciality name + description + subservices in one call\n\n**Why use `include_all=1`?**\n```\n# Without flag — comma string only\nGET /doctors?id=1\n→ { ..., \"subservice_names\": \"ECG, Holter\" }\n\n# With flag — full array\nGET /doctors?id=1&include_all=1\n→ { ..., \"subservice_names\": \"ECG, Holter\",\n     \"subservices\": [{\"id\":1,\"name\":\"Echocardiogram\",\"fees\":150}, ...] }\n```\n\n**Response includes:**\n- Doctor fields (`name`, `email`, `rank`, `gender`, etc.)\n- `speciality_name` + `speciality_description` (from `speciality` table)\n- With `include_all=1`: `subservices` array (from `doctor_subservices` + `sub_services`)"
+                },
+                {
+                    "name": "Assign SubService to Doctor (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"doctor_id\": 1,\n    \"subservice_id\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api.php/doctors/assign-subservice",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api.php",
+                                "doctors",
+                                "assign-subservice"
+                            ]
+                        }
+                    },
+                    "description": "## 🔗 Link SubService to Doctor\n\n**Requires Admin token.**\n\nCreates a relationship in the `doctor_subservices` pivot table. This is the link that makes Smart Booking work.\n\n**What happens:**\n1. Doctor 1 now \"offers\" SubService 5\n2. Users can find this doctor with `?subservice_id=5`\n3. When booking, the API validates `subservice_ids` against this relationship\n4. Both `doctors:*` and `subservices:*` caches are flushed\n\n**Duplicate-safe:** Uses `INSERT IGNORE`. If the pair already exists, it's silently ignored.\n\n> 💡 To assign multiple subservices to one doctor, call this endpoint for each pair. There's no batch endpoint — YAGNI."
                 },
                 {
                     "name": "Create Doctor (Admin)",
@@ -228,9 +296,9 @@
                                 "api.php",
                                 "doctors"
                             ]
-                        },
-                        "description": "### Create New Doctor\n**Requires Admin Privileges.**\nCreates a new doctor profile and invalidates the `doctors:*` Redis cache namespace."
-                    }
+                        }
+                    },
+                    "description": "## Create Doctor Profile\n\n**Requires Admin token.**\n\n**Required fields:** `name`, `email`, `rank`, `gender`, `spec_id`\n**Optional:** `is_available` (defaults to 1)\n\n**Valid ranks:** intern, resident, specialist, senior specialist, consultant\n**Valid genders:** male, female\n\n> 💡 After creating a doctor, assign subservices via `POST /doctors/assign-subservice`"
                 },
                 {
                     "name": "Update Doctor (Admin)",
@@ -257,7 +325,7 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/api.php/doctors?id=1",
+                            "raw": "{{base_url}}/api.php/doctors",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -271,9 +339,9 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "### Update Doctor\n**Requires Admin Privileges.**\nPerforms a partial update (PATCH). Only provided fields will be updated. Invalidates caches."
-                    }
+                        }
+                    },
+                    "description": "## Update Doctor (Partial)\n\n**Requires Admin token.**\n\nPATCH-style update. Send only the fields you want to change.\n\n**Examples:**\n- Change availability: `{\"is_available\": 0}`\n- Promote rank: `{\"rank\": \"consultant\"}`\n- Change speciality: `{\"spec_id\": 2}`\n\nCache for this doctor is cleared after update."
                 },
                 {
                     "name": "Delete Doctor (Admin)",
@@ -291,7 +359,7 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api.php/doctors?id=1",
+                            "raw": "{{base_url}}/api.php/doctors",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -305,11 +373,12 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "### Delete Doctor\n**Requires Admin Privileges.**\nPerforms a **Soft Delete** (`deleted_at = NOW()`). This preserves referential integrity for historical appointments."
-                    }
+                        }
+                    },
+                    "description": "## Soft-Delete Doctor\n\n**Requires Admin token.**\n\nSets `deleted_at = NOW()`. Doctor won't appear in GET lists, but historical appointments remain intact.\n\n**Cannot be undone via API.** Direct DB edit needed for recovery."
                 }
-            ]
+            ],
+            "description": "## Doctors — The Core Entity\n\nDoctors are the heart of the system. Every appointment needs a doctor.\n\n**How doctors connect:**\n- Each doctor has a `spec_id` → links to a Speciality\n- Each doctor can `offer` multiple SubServices → via `doctor_subservices` pivot\n- Each doctor has availability (`is_available`) and rank (`rank`)\n\n**Smart Filtering — Combine freely:**\n`GET /doctors?gender=female&rank=specialist&spec_id=1&subservice_id=3&page=1&limit=10`\n\n**Response enrichment (every endpoint):**\n- `speciality_name` + `speciality_description` via LEFT JOIN\n- `subservice_names` (comma-separated) via correlated subquery\n- Use `?include_all=1` on detail for full subservices array\n\n**Cache behavior:** All write operations flush `doctors:*` Redis keys automatically.\n\n**Soft deletes:** Doctor records use `deleted_at`. They remain in the DB for historical appointments."
         },
         {
             "name": "3. Appointments",
@@ -370,9 +439,9 @@
                                     "description": "Pagination: Items per page"
                                 }
                             ]
-                        },
-                        "description": "Users see only their own. Admins see all. Check 'Params' tab to toggle filters."
-                    }
+                        }
+                    },
+                    "description": "## 🔍 Smart Filter — Appointments\n\n**Auth:** User sees own appointments. Admin sees all.\n\n**Available filters:**\n\n| Param | Example | Notes |\n|---|---|---|\n| `status` | `?status=pending` | pending, confirmed, cancelled, completed |\n| `date_time` | `?date_time=2026-06-20` | Filters by date (DATE() in SQL) |\n| `doc_id` | `?doc_id=1` | Filter by doctor |\n| `spec_id` | `?spec_id=2` | Filter by speciality |\n| `page` | `?page=1` | Pagination |\n| `limit` | `?limit=10` | Items per page |\n\n**Response enrichment — JOINed fields:**\n```json\n{\n  \"id\": 1,\n  \"doctor_name\": \"Dr. Amr Diab\",\n  \"patient_name\": \"Ahmed Ali\",\n  \"speciality_name\": \"Cardiology\",\n  \"status\": \"pending\",\n  \"date_time\": \"2026-06-15 10:00:00\"\n}\n```\n> All appointment queries `LEFT JOIN doctors`, `LEFT JOIN users`, and `LEFT JOIN speciality` to return `doctor_name`, `patient_name`, `patient_phone`, and `speciality_name`. No extra API calls needed."
                 },
                 {
                     "name": "Get Appointment by ID (Admin)",
@@ -390,7 +459,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api.php/appointments?id=1",
+                            "raw": "{{base_url}}/api.php/appointments",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -401,11 +470,13 @@
                             "query": [
                                 {
                                     "key": "id",
-                                    "value": "1"
+                                    "value": "1",
+                                    "description": "Appointment ID"
                                 }
                             ]
                         }
-                    }
+                    },
+                    "description": "## Appointment Detail\n\n**Requires Admin token.**\n\nReturns full appointment data including `doctor_name` and `patient_name` via SQL JOINs.\n\n> 💡 Users cannot access this endpoint. Users see their own appointments via `GET /appointments` (without id)."
                 },
                 {
                     "name": "Create Appointment (User)",
@@ -424,7 +495,7 @@
                         "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"status\": \"pending\",\n    \"date_time\": \"2026-06-20 10:00:00\",\n    \"doc_id\": 1\n}",
+                            "raw": "{\n    \"status\": \"pending\",\n    \"date_time\": \"2026-06-20 10:00:00\",\n    \"doc_id\": 1,\n    \"spec_id\": 2,\n    \"subservice_ids\": [1, 2]\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -441,7 +512,8 @@
                                 "appointments"
                             ]
                         }
-                    }
+                    },
+                    "description": "## 🧠 Smart Booking — Create Appointment\n\n**Requires User token.** Only users (not admins) can book.\n\n**How Smart Booking works:**\n\n1. You specify `doc_id` (which doctor)\n2. Optionally specify `spec_id` (overrides doctor speciality, else auto-populated)\n3. Optionally specify `subservice_ids` (array of subservice IDs)\n4. API checks each `subservice_id` against `doctor_subservices`\n5. If any subservice isn't offered by this doctor → 400 error with details\n6. If valid → appointment created + records inserted into `appointment_subservice`\n\n**fields:**\n| Field | Required | Description |\n|---|---|---|\n| `status` | ✅ | pending, confirmed, cancelled, completed |\n| `date_time` | ✅ | YYYY-MM-DD HH:MM:SS |\n| `doc_id` | ✅ | Doctor ID |\n| `spec_id` | ❌ | Speciality ID (auto-populated from doctor if omitted) |\n| `subservice_ids` | ❌ | Array of subservice IDs the doctor offers |\n\n**spec_id is optional.** If omitted, it's auto-filled from the doctor's speciality. If provided, it overrides (useful if doctor's speciality changed after booking)."
                 },
                 {
                     "name": "Update Appointment (Admin)",
@@ -468,7 +540,7 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/api.php/appointments?id=1",
+                            "raw": "{{base_url}}/api.php/appointments",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -482,11 +554,12 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "### Update Appointment Status\n**Requires Admin Privileges.**\nAllows admins to change the status of an appointment (`pending`, `confirmed`, `cancelled`, `completed`)."
-                    }
+                        }
+                    },
+                    "description": "## Update Appointment\n\n**Requires Admin token.**\n\nUse PATCH to update fields. Common use: change status.\n\n**Status values:** `pending` → `confirmed` → `completed` (or `cancelled`)\n\n**Example:** `{\"status\": \"confirmed\"}` to approve a pending request."
                 }
-            ]
+            ],
+            "description": "## Appointments — Smart Booking\n\nThe highest-level entity that ties everything together.\n\n**Smart Booking Philosophy:**\nWhen a user books an appointment, they can optionally specify which subservices they need. The API validates that the doctor actually offers those subservices.\n\n**Response enrichment (JOINed fields, no extra calls):**\n| Field | Source SQL |\n|---|---|\n| `doctor_name` | `LEFT JOIN doctors dr ON dr.id = a.doc_id` |\n| `patient_name` | `LEFT JOIN users pt ON pt.id = a.user_id` |\n| `patient_phone` | Same JOIN on users |\n| `speciality_name` | `LEFT JOIN speciality sp ON sp.id = a.spec_id` |\n\n**New: `spec_id` field on every appointment —**\n- Optional on create (auto-populated from doctor's speciality)\n- Can be filtered via `?spec_id=2`\n- Records which speciality the doctor belonged to at booking time (survives doctor spec changes)\n\n**Example response:**\n```json\n{\n  \"id\": 1,\n  \"status\": \"pending\",\n  \"doctor_name\": \"Dr. Amr Diab\",\n  \"patient_name\": \"Ahmed Ali\",\n  \"speciality_name\": \"Cardiology\",\n  \"date_time\": \"2026-06-15 10:00:00\"\n}\n```\n\n**Role-based access:**\n- **Users** see only their own appointments (filtered by JWT `user_id`)\n- **Admins** see all appointments\n- **Create** requires user role only"
         },
         {
             "name": "4. Patients",
@@ -542,126 +615,11 @@
                                 }
                             ]
                         }
-                    }
+                    },
+                    "description": "## 🔍 Smart Filter — Patients\n\n**Requires Admin token.**\n\n**Available filters:** `gender`, `age`, `name`, `page`, `limit`\n\n**Name filter** uses LIKE — partial matches work. `?name=Ahmed` returns Ahmed Ali, Ahmed ELsayed, etc.\n\n**Pagination:** Use `?page=1&limit=10` for paginated results."
                 },
                 {
                     "name": "Get Patient by ID (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{admin_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api.php/patients?id=1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api.php",
-                                "patients"
-                            ],
-                            "query": [
-                                {
-                                    "key": "id",
-                                    "value": "1"
-                                }
-                            ]
-                        },
-                        "description": "### Fetch Single Patient\n**Requires Admin Privileges.**\nRetrieves patient details. Will return 404 if the requested ID belongs to an admin account."
-                    }
-                },
-                {
-                    "name": "Update Patient (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{admin_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "PATCH",
-                        "header": [],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"phone\": \"01099998888\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/api.php/patients?id=1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api.php",
-                                "patients"
-                            ],
-                            "query": [
-                                {
-                                    "key": "id",
-                                    "value": "1"
-                                }
-                            ]
-                        },
-                        "description": "### Update Patient Details\n**Requires Admin Privileges.**\nPartial update for patient records."
-                    }
-                },
-                {
-                    "name": "Delete Patient (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{admin_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "DELETE",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api.php/patients?id=1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api.php",
-                                "patients"
-                            ],
-                            "query": [
-                                {
-                                    "key": "id",
-                                    "value": "1"
-                                }
-                            ]
-                        },
-                        "description": "### Delete Patient\n**Requires Admin Privileges.**\nPerforms a **Soft Delete** on the user record."
-                    }
-                }
-            ]
-        },
-        {
-            "name": "4. Patients",
-            "item": [
-                {
-                    "name": "Get All / Filter Patients (Admin)",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -686,66 +644,14 @@
                             ],
                             "query": [
                                 {
-                                    "key": "gender",
-                                    "value": "male",
-                                    "disabled": true,
-                                    "description": "Optional: Filter by gender"
-                                },
-                                {
-                                    "key": "age",
-                                    "value": "25",
-                                    "disabled": true,
-                                    "description": "Optional: Filter by exact age"
-                                },
-                                {
-                                    "key": "page",
+                                    "key": "id",
                                     "value": "1",
-                                    "disabled": false,
-                                    "description": "Pagination: Page number"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10",
-                                    "disabled": false,
-                                    "description": "Pagination: Items per page"
+                                    "description": "Patient ID"
                                 }
                             ]
                         }
-                    }
-                },
-                {
-                    "name": "Get Patient by ID (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{admin_token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/api.php/patients?id=1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api.php",
-                                "patients"
-                            ],
-                            "query": [
-                                {
-                                    "key": "id",
-                                    "value": "1"
-                                }
-                            ]
-                        },
-                        "description": "### Fetch Single Patient\n**Requires Admin Privileges.**\nRetrieves patient details. Will return 404 if the requested ID belongs to an admin account."
-                    }
+                    },
+                    "description": "## Patient Detail\n\n**Requires Admin token.**\n\nReturns full patient record. Will 404 if the requested ID belongs to an admin account (role !== \"user\")."
                 },
                 {
                     "name": "Update Patient (Admin)",
@@ -772,7 +678,7 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/api.php/patients?id=1",
+                            "raw": "{{base_url}}/api.php/patients",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -786,9 +692,9 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "### Update Patient Details\n**Requires Admin Privileges.**\nPartial update for patient records."
-                    }
+                        }
+                    },
+                    "description": "## Update Patient\n\n**Requires Admin token.**\n\nPATCH-style update. Common fields: `phone`, `age`, `gender`.\n\n> 💡 For email/password changes, the patient should use Auth endpoints."
                 },
                 {
                     "name": "Delete Patient (Admin)",
@@ -806,7 +712,7 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api.php/patients?id=1",
+                            "raw": "{{base_url}}/api.php/patients",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -820,11 +726,201 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "### Delete Patient\n**Requires Admin Privileges.**\nPerforms a **Soft Delete** on the user record."
-                    }
+                        }
+                    },
+                    "description": "## Soft-Delete Patient\n\n**Requires Admin token.**\n\nSets `deleted_at = NOW()`. Patient can no longer log in or appear in listings. Appointments remain for audit."
                 }
-            ]
+            ],
+            "description": "## Patients — User Management (Admin Only)\n\nPatients are the `users` table records where `role = \"user\"`. Admins manage them.\n\n**What you can do:**\n- List all patients with filters\n- View patient details\n- Update contact info\n- Soft-delete patients\n\n**Why admin-only?** Patients manage their own profile through the Auth module (register, login, forgot password). Admins handle support cases.\n\n> 🧠 Patients and Admins live in the same `users` table, differentiated by `role` column. Patient endpoints automatically filter `WHERE role = 'user'`."
+        },
+        {
+            "name": "5. Specialities",
+            "item": [
+                {
+                    "name": "Get All / Filter Specialities (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api.php/specialities",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api.php",
+                                "specialities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "name",
+                                    "value": "Dentist",
+                                    "disabled": true,
+                                    "description": "Optional filter by name (LIKE)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "disabled": false,
+                                    "description": "Pagination: Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "disabled": false,
+                                    "description": "Pagination: Items per page"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "## 🔍 Filter — Specialities\n\n**Public endpoint.** No token needed.\n\n**Filters:**\n- `?name=Dentist` — LIKE search (partial match)\n- `?page=1&limit=10` — pagination\n\n**Tip:** Use this to populate a dropdown in your UI."
+                },
+                {
+                    "name": "Get Speciality by ID (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api.php/specialities",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api.php",
+                                "specialities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Speciality ID"
+                                },
+                                {
+                                    "key": "include_doctors",
+                                    "value": "1",
+                                    "disabled": true,
+                                    "description": "Set to 1 to include doctors_count"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "## 🚩 Speciality Detail — With Doctor Count\n\n**Public endpoint.**\n\n**Bonus flag — `include_doctors=1`**\nAppends a `doctors_count` field showing how many active doctors belong to this speciality.\n\nExample: `GET /specialities?id=1&include_doctors=1`\n→ returns `{\"id\":1, \"name\":\"Cardiology\", \"doctors_count\": 6, ...}`"
+                },
+                {
+                    "name": "Create Speciality (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Dermatology\",\n    \"description\": \"Skin care and treatment\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api.php/specialities",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api.php",
+                                "specialities"
+                            ]
+                        }
+                    },
+                    "description": "## Create Speciality\n\n**Requires Admin token.**\n\n**Duplicate check:** Names are case-insensitive unique. Trying to create \"Cardiology\" when it exists returns 409 Conflict.\n\n**Fields:** `name` (required), `description` (optional)."
+                },
+                {
+                    "name": "Update Speciality (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"description\": \"Updated description\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api.php/specialities",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api.php",
+                                "specialities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "## Update Speciality\n\n**Requires Admin token.**\n\nPATCH-style. Send only changed fields. Name uniqueness is re-validated if name changes."
+                },
+                {
+                    "name": "Delete Speciality (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api.php/specialities",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api.php",
+                                "specialities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "description": "## Soft-Delete Speciality\n\n**Requires Admin token.**\n\nSets `deleted_at = NOW()`. Won't appear in listings. Existing doctors keep their `spec_id` reference."
+                }
+            ],
+            "description": "## Specialities — Doctor Categories\n\nSpecialities are the top-level classification (Cardiology, Dermatology, Pediatrics…).\n\n**How they connect:**\n- Each doctor has a `spec_id` pointing to a speciality\n- `GET /doctors?spec_id=1` filters doctors by speciality\n- `?include_doctors=1` on detail view shows `doctors_count`\n\n**Data note:** The table is named `speciality` (singular) in the database. The API route accepts both `/specialities` and `/speciality`.\n\n**Soft deletes** apply here too. Deleting a speciality doesn't delete its doctors (foreign key is SET NULL pattern via app logic)."
         },
         {
             "name": "6. SubServices",
@@ -848,13 +944,19 @@
                                     "key": "name",
                                     "value": "X-Ray",
                                     "disabled": true,
-                                    "description": "Optional filter by name"
+                                    "description": "Optional filter by name (LIKE)"
                                 },
                                 {
-                                    "key": "fees",
-                                    "value": "150",
+                                    "key": "min_fees",
+                                    "value": "100",
                                     "disabled": true,
-                                    "description": "Optional filter by fee amount"
+                                    "description": "Optional: Minimum fee filter"
+                                },
+                                {
+                                    "key": "max_fees",
+                                    "value": "500",
+                                    "disabled": true,
+                                    "description": "Optional: Maximum fee filter"
                                 },
                                 {
                                     "key": "page",
@@ -870,7 +972,8 @@
                                 }
                             ]
                         }
-                    }
+                    },
+                    "description": "## 🔍 Filter — SubServices\n\n**Public endpoint.** No token needed.\n\n**Filters:**\n| Param | Example | Behavior |\n|---|---|---|\n| `name` | `?name=X-Ray` | LIKE search |\n| `min_fees` | `?min_fees=100` | Fees >= 100 |\n| `max_fees` | `?max_fees=500` | Fees <= 500 |\n| `page` | `?page=1` | Pagination |\n| `limit` | `?limit=10` | Items per page |\n\n**Smart combo:** `?name=Cardio&min_fees=50&max_fees=300`"
                 },
                 {
                     "name": "Get SubService by ID (Public)",
@@ -878,7 +981,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api.php/subservices?id=1",
+                            "raw": "{{base_url}}/api.php/subservices",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -889,11 +992,19 @@
                             "query": [
                                 {
                                     "key": "id",
-                                    "value": "1"
+                                    "value": "1",
+                                    "description": "SubService ID"
+                                },
+                                {
+                                    "key": "include_doctors",
+                                    "value": "1",
+                                    "disabled": true,
+                                    "description": "Set to 1 to include doctors offering this subservice"
                                 }
                             ]
                         }
-                    }
+                    },
+                    "description": "## 🚩 SubService Detail — With Doctors\n\n**Public endpoint.**\n\n**Bonus flag — `include_doctors=1`**\nReturns which doctors offer this subservice (via `doctor_subservices` pivot).\n\n**Each doctor now includes enriched fields:**\n- `speciality_name` — which speciality they belong to\n- `subservice_names` — all subservices they offer (not just this one)\n\n**Example:**\n```\nGET /subservices?id=1&include_doctors=1\n→ {\n    \"id\": 1,\n    \"name\": \"Echocardiogram\",\n    \"doctors\": [\n      {\n        \"id\": 1,\n        \"name\": \"Dr. Ahmed Tyson\",\n        \"speciality_name\": \"Pediatrics\",\n        \"subservice_names\": \"Echocardiogram, ECG Rhythm Test, Stress ECG Test, Holter Monitor\"\n      }\n    ]\n  }\n```\n\n**💡 Smart flow:** Find a subservice → see which doctors offer it → check their full profile → book."
                 },
                 {
                     "name": "Create SubService (Admin)",
@@ -929,7 +1040,8 @@
                                 "subservices"
                             ]
                         }
-                    }
+                    },
+                    "description": "## Create SubService\n\n**Requires Admin token.**\n\n**Fields:** `name` (max 15 chars), `fees` (numeric, >= 0), `description`\n\nAfter creating, link it to doctors via `POST /doctors/assign-subservice`."
                 },
                 {
                     "name": "Update SubService (Admin)",
@@ -956,7 +1068,7 @@
                             }
                         },
                         "url": {
-                            "raw": "{{base_url}}/api.php/subservices?id=1",
+                            "raw": "{{base_url}}/api.php/subservices",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -971,7 +1083,8 @@
                                 }
                             ]
                         }
-                    }
+                    },
+                    "description": "## Update SubService\n\n**Requires Admin token.**\n\nPATCH-style. Common changes: price adjustment (`fees`), description update.\n\n> 💡 Name changes here won't affect existing `doctor_subservices` links — they reference the ID."
                 },
                 {
                     "name": "Delete SubService (Admin)",
@@ -989,7 +1102,7 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{base_url}}/api.php/subservices?id=1",
+                            "raw": "{{base_url}}/api.php/subservices",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -1003,11 +1116,12 @@
                                     "value": "1"
                                 }
                             ]
-                        },
-                        "description": "### Delete SubService\n**Requires Admin Privileges.**\n**Note:** Unlike all other modules, deleting a SubService performs a **Hard Delete** (`DELETE FROM`), completely removing it from the database as it acts as standalone reference data."
-                    }
+                        }
+                    },
+                    "description": "## ⚠️ Hard Delete — SubService\n\n**Requires Admin token.**\n\nUnlike other modules, this performs a **hard delete** (`DELETE FROM sub_services WHERE id = X`).\n\n**Why:** SubServices are standalone reference data. Soft delete would cascade-behavior complications with the `doctor_subservices` pivot.\n\n**Effects:**\n- Existing `doctor_subservices` rows referencing this ID are also deleted (CASCADE)\n- Existing `appointment_subservice` rows are NOT affected\n- This subservice won't appear in any listings"
                 }
-            ]
+            ],
+            "description": "## SubServices — Doctor Offerings\n\nSubServices are the specific procedures or tests a doctor can perform.\n\n**The Smart Booking connection:**\n1. Admin creates subservices (e.g., \"Echocardiogram\", \"Carotid Doppler\")\n2. Admin links them to doctors via `POST /doctors/assign-subservice`\n3. Users search for doctors by subservice: `?subservice_id=5`\n4. Users book with specific subservices via `subservice_ids` array\n\n**Filtering extras:**\n- `?name=Scan` — LIKE search\n- `?min_fees=100&max_fees=500` — price range filter\n\n**Response enrichment with `?include_doctors=1`:**\nEach doctor in the response includes `speciality_name` and `subservice_names` — same enriched fields as the main doctor endpoint.\n\n**Example flow:**\n```\n# Find a subservice\nGET /subservices?name=Echo\n\n# See which doctors offer it\nGET /subservices?id=1&include_doctors=1\n→ doctors[].speciality_name, doctors[].subservice_names\n\n# Book with that doctor + subservice\nPOST /appointments { \"doc_id\": 1, \"subservice_ids\": [1] }\n```\n\n**Important:** Unlike other modules, SubServices use **hard delete** (`DELETE FROM`)."
         }
     ],
     "variable": [

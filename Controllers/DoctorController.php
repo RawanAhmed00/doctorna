@@ -76,16 +76,22 @@ function handleGetDoctorById($conn) {
     $cacheKey = 'doctor:' . $id;
 
     $includeSubservices = isset($_GET['include_subservices']) && $_GET['include_subservices'] == '1';
-    if ($includeSubservices) {
-        $cacheKey .= ':with_subservices';
-    }
+    $includeAll = isset($_GET['include_all']) && $_GET['include_all'] == '1';
+
+    if ($includeSubservices) $cacheKey .= ':with_subservices';
+    if ($includeAll) $cacheKey .= ':with_all';
 
     serveFromCacheIfAvailable($cacheKey, "Doctor fetched successfully");
 
-    $doctor = getDoctor($conn, $id);
-    
-    if ($includeSubservices) {
+    if ($includeAll) {
+        $doctor = getDoctorWithAllRelations($conn, $id);
+        if (!$doctor) response(HttpStatus('NOT_FOUND'), "Doctor not found");
         $doctor['subservices'] = getDoctorSubServices($conn, $id);
+    } else {
+        $doctor = getDoctor($conn, $id);
+        if ($includeSubservices) {
+            $doctor['subservices'] = getDoctorSubServices($conn, $id);
+        }
     }
 
     saveToCache($cacheKey, $doctor);

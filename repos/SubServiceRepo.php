@@ -23,10 +23,16 @@ function getSubServiceById($conn, $id) {
 }
 
 function getDoctorsBySubService($conn, $subservice_id) {
-    $sql = "SELECT d.* 
+    $sql = "SELECT d.*, s.name AS speciality_name,
+                   (SELECT GROUP_CONCAT(ss2.name ORDER BY ss2.id SEPARATOR ', ')
+                    FROM doctor_subservices ds2
+                    JOIN sub_services ss2 ON ss2.id = ds2.subservice_id
+                    WHERE ds2.doctor_id = d.id) AS subservice_names
             FROM doctors d
+            LEFT JOIN speciality s ON s.id = d.spec_id
             INNER JOIN doctor_subservices ds ON d.id = ds.doctor_id
-            WHERE ds.subservice_id = :subservice_id AND d.deleted_at IS NULL";
+            WHERE ds.subservice_id = :subservice_id
+              AND d.deleted_at IS NULL";
     $stmt = runQuery($conn, $sql, ['subservice_id' => $subservice_id]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
