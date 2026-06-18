@@ -73,6 +73,10 @@ function handleRegister($conn){
     validatePasswordStrength($pass);
 
     if (!is_numeric($age) || $age <= 0 || $age > 120) {
+        response(HttpStatus('BAD_REQUEST'), "Age must be a valid positive number between 1 and 120 !");
+    }
+
+    if (!in_array($gender, ['male', 'female'])) {
         response(HttpStatus('BAD_REQUEST'), "Gender must be either 'male' or 'female' !");
     }
     
@@ -88,7 +92,11 @@ function handleRegister($conn){
     $data['password'] = password_hash($pass, PASSWORD_DEFAULT);
     createUser($conn, $data);
     
-    response(HttpStatus('CREATED'), "User registered successfully !");
+    // Automatically log the user in by generating a token after registration
+    $newUser = getUserByEmail($conn, $email);
+    $token = GenerateToken($newUser);
+    
+    response(HttpStatus('CREATED'), "User registered successfully !", ["token" => $token]);
 }
 
 function handleForgotPassword($conn){
