@@ -228,7 +228,8 @@
                                 "api.php",
                                 "doctors"
                             ]
-                        }
+                        },
+                        "description": "### Create New Doctor\n**Requires Admin Privileges.**\nCreates a new doctor profile and invalidates the `doctors:*` Redis cache namespace."
                     }
                 },
                 {
@@ -270,7 +271,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Update Doctor\n**Requires Admin Privileges.**\nPerforms a partial update (PATCH). Only provided fields will be updated. Invalidates caches."
                     }
                 },
                 {
@@ -303,7 +305,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Delete Doctor\n**Requires Admin Privileges.**\nPerforms a **Soft Delete** (`deleted_at = NOW()`). This preserves referential integrity for historical appointments."
                     }
                 }
             ]
@@ -479,7 +482,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Update Appointment Status\n**Requires Admin Privileges.**\nAllows admins to change the status of an appointment (`pending`, `confirmed`, `cancelled`, `completed`)."
                     }
                 }
             ]
@@ -570,7 +574,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Fetch Single Patient\n**Requires Admin Privileges.**\nRetrieves patient details. Will return 404 if the requested ID belongs to an admin account."
                     }
                 },
                 {
@@ -612,7 +617,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Update Patient Details\n**Requires Admin Privileges.**\nPartial update for patient records."
                     }
                 },
                 {
@@ -645,7 +651,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Delete Patient\n**Requires Admin Privileges.**\nPerforms a **Soft Delete** on the user record."
                     }
                 }
             ]
@@ -736,7 +743,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Fetch Single Patient\n**Requires Admin Privileges.**\nRetrieves patient details. Will return 404 if the requested ID belongs to an admin account."
                     }
                 },
                 {
@@ -778,7 +786,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Update Patient Details\n**Requires Admin Privileges.**\nPartial update for patient records."
                     }
                 },
                 {
@@ -811,7 +820,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Delete Patient\n**Requires Admin Privileges.**\nPerforms a **Soft Delete** on the user record."
                     }
                 }
             ]
@@ -993,7 +1003,8 @@
                                     "value": "1"
                                 }
                             ]
-                        }
+                        },
+                        "description": "### Delete SubService\n**Requires Admin Privileges.**\n**Note:** Unlike all other modules, deleting a SubService performs a **Hard Delete** (`DELETE FROM`), completely removing it from the database as it acts as standalone reference data."
                     }
                 }
             ]
