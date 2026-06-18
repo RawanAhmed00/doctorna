@@ -57,12 +57,14 @@ function handleGetAllDoctors($conn) {
     // Validate filter values if they are provided by reusing the core validation guard
     validateDoctorData($_GET);
 
+    $includeAll = isset($_GET['include_all']) && $_GET['include_all'] == '1';
+
     // Build dynamic, sorted cache key automatically
-    $cacheKey = generateFilteredCacheKey('doctors', ['gender', 'rank', 'is_available', 'name', 'page', 'limit']);
+    $cacheKey = generateFilteredCacheKey('doctors', ['gender', 'rank', 'is_available', 'name', 'spec_id', 'speciality_name', 'page', 'limit', 'include_all']);
 
     serveFromCacheIfAvailable($cacheKey, "Doctors fetched successfully");
 
-    $doctors = getAllDoctorsWithSpeciality($conn);
+    $doctors = $includeAll ? getAllDoctorsWithSpeciality($conn) : getAllDoctors($conn);
     saveToCache($cacheKey, $doctors);
 
     response(HttpStatus('OK'), "Doctors fetched successfully", [
