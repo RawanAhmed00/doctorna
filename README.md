@@ -1,138 +1,125 @@
-# 🏥 Doctorna API — Smart Medical Booking System
+<div align="center">
 
-![PHP](https://img.shields.io/badge/PHP-8.x-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![Composer](https://img.shields.io/badge/Composer-2.x-885630?style=for-the-badge&logo=composer&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+# 🏥 Doctorna REST API
 
-## 📖 Project Overview
-Doctorna is the core RESTful API backend for managing hospital operations, doctor availability, and patient appointments. It is built entirely in raw PHP using an elegant, custom MVC-like architecture. The system relies heavily on strict separation of concerns, high-performance Redis caching, and robust stateless authentication.
+A lightning-fast, framework-less PHP RESTful API designed for clinic management and medical appointment booking.
 
-The application has been fully integrated into a unified `main` branch, bringing together modules from 6 different core developers into a single, cohesive ecosystem.
+[![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-777BB4?logo=php&logoColor=white)](#)
+[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white)](#)
+[![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?logo=redis&logoColor=white)](#)
+[![JWT](https://img.shields.io/badge/JWT-Auth-black?logo=jsonwebtokens)](#)
 
-## ✨ Key Features
-- **Centralized Master Router (`api.php`):** All HTTP requests route through a single entry point utilizing a hybrid `/module/action` parsing system, guaranteeing uniform error handling across the entire API.
-- **Defensive Security & RBAC:** Stateless JWT Authentication secures the endpoints. Row-Level Security prevents IDOR (Insecure Direct Object Reference) by injecting `user_id` directly from tokens, and strict validation guards prevent Mass Assignment.
-- **Smart Data Filtering:** Advanced `applyFilters()` utilizing an Operator Map handles complex `LIKE` searches and `>=`, `<=` range filtering dynamically without writing custom SQL.
-- **High-Performance Caching:** Every `GET` endpoint leverages Redis. Dynamic cache keys are generated deterministically using sorted query parameters, guaranteeing instant sub-millisecond responses.
-- **Database Reliability:** Utilizing `PDO` Prepared Statements to eliminate SQL injection, global Soft Deletion across models (to maintain referential integrity), and a unified Server-Side Pagination helper.
-- **Standardized JSON Responses:** A uniform output structure (`status_code`, `message`, `data`) for 100% of API endpoints, making frontend consumption incredibly smooth.
+</div>
 
 ---
 
-## 🛠️ Requirements & Prerequisites
-To run this project locally, ensure your machine has the following installed:
-1. **PHP 8.0+** (Added to your system PATH)
-2. **Composer 2.x** (Global installation)
-3. **MySQL / MariaDB** (Easily available via XAMPP)
-4. **Redis Server** (Running locally on default port `6379`)
+## 🚀 Overview
+
+Doctorna is a modern, stateless backend API built entirely in **Vanilla PHP** (no frameworks like Laravel or Symfony). It was engineered from the ground up to demonstrate clean architecture, high performance, and strict security practices without the overhead of heavy external libraries.
+
+The system handles user authentication, medical staff management, clinic specialities, granular sub-services, and real-time appointment booking.
+
+## ✨ Core Architecture & Features
+
+- **Zero-Framework Architecture:** Built with pure PHP 8 to maximize execution speed and maintain absolute control over the request lifecycle.
+- **Stateless Authentication:** Secure endpoints using `firebase/php-jwt`. No server-side sessions (`$_SESSION`) are used.
+- **Repository Pattern:** Database logic is strictly decoupled from business logic. Controllers never write SQL; Repositories handle all PDO operations.
+- **High-Speed Caching:** Integrated with `predis/predis`. Expensive database reads are cached in **Redis** and automatically invalidated upon data mutation.
+- **Centralized Routing:** All HTTP traffic is funneled through a single Master Router, ensuring unified exception handling and CORS management.
+- **SQL Injection Prevention:** 100% adherence to PDO Prepared Statements with named parameters.
+- **Unified JSON Responses:** Every endpoint returns a predictable, standardized JSON structure.
 
 ---
 
-## 🚀 Installation & Setup Guide
+## ⚙️ Prerequisites
 
-**1. Clone the repository:**
+To run this application locally, your development environment must have:
+
+- **PHP 8.0** or higher
+- **Composer** (Dependency Manager for PHP)
+- **MySQL** or **MariaDB**
+- **Redis Server** (Running on `127.0.0.1:6379`)
+
+---
+
+## 🛠️ Installation & Setup
+
+**1. Clone the repository**
 ```bash
-git clone <repository_url>
+git clone https://github.com/your-username/doctorna.git
 cd doctorna
 ```
 
-**2. Install Dependencies:**
-We use Composer to install required packages (Firebase JWT, Predis, and PHPMailer):
+**2. Install dependencies**
+Install the minimal required packages (JWT, Predis, Dotenv) via Composer:
 ```bash
 composer install
 ```
 
-**3. Configure your Environment:**
+**3. Environment Configuration**
+Copy the example environment file and configure your local credentials:
 ```bash
 cp .env.example .env
 ```
-Open `.env` and fill in your local MySQL, Redis, and SMTP credentials. **Critically: Provide a secure, 32+ character `JWT_SECRET`.**
+*Note: You must generate and set a strong, random 32-character string for `JWT_SECRET` in your `.env` file, or the application will throw a 500 Internal Server Error.*
 
-**4. Database Migration:**
-Import the provided SQL dump from the `database/` directory into your local MySQL instance to create the necessary tables (`users`, `doctors`, `speciality`, `appointments`, `sub_services`).
+**4. Database Migration**
+Create a new MySQL database named `doctorna`. Import the provided SQL schema to generate the required tables and relationships:
+```bash
+mysql -u root -p doctorna < database/doctorna.sql
+```
 
-**5. Start the Application Locally:**
-You can serve the API directly via PHP's built-in development server.
+**5. Start the Development Server**
+Serve the application using PHP's built-in web server, pointing all traffic to the central router:
 ```bash
 php -S localhost:8000 routes/api.php
 ```
 
 ---
 
-## 📂 Folder Structure (Flat Architecture)
+## 📂 Project Structure
 
 ```text
-doctorna/
-├── config/          # Environment parsers and database connection wrappers
-├── Controllers/     # HTTP Request handlers, private validation guards, and JSON delivery
-├── database/        # SQL schema dumps and migrations
-├── docs/            # Markdown backups of official architectural documentation
-├── helper/          # Core reusable ecosystem (filtration, cache, jwt, response, pagination)
-├── repos/           # Database Data Access Layer (PDO execution and soft deletes)
-├── routes/          # Central API routing (api.php is the sole entry point)
-├── diagrams/        # ERDs and Architectural mapping diagrams
-├── .env.example     # Template for required environment variables
-├── composer.json    # Dependency and Autoload mapping configuration
-└── README.md        # The document you are reading right now!
+/
+├── config/          # Environment loading and database connection
+├── Controllers/     # Request parsing, validation, and business logic
+├── helper/          # Global utilities (Response formatting, caching, filtration)
+├── repos/           # Data Access Layer (SQL queries and PDO)
+├── routes/          # API Gateway (api.php)
+├── .env.example     # Environment variable template
+└── composer.json    # Autoloading and dependency mapping
 ```
 
 ---
 
-## 📚 Comprehensive Documentation
-The entire Doctorna architecture, from high-level philosophy to code-level security patterns, has been fully documented across 6 distinct phases. These are available in both **English** (in the `docs/` folder) and **Egyptian Arabic** (synced to our Notion workspace).
+## 📡 API Interaction & Postman
 
-1. **Phase 1:** Project Overview & Master Architecture
-2. **Phase 2:** Core Helpers Ecosystem (The DRY Philosophy)
-3. **Phase 3:** Controllers & Routing Layer (Business Logic & Flow)
-4. **Phase 4:** Repositories & Data Access Layer (PDO & Soft Delete)
-5. **Phase 5:** Security & Authentication Deep Dive (Defense in Depth)
-6. **Phase 6:** Future Integration Plans (M:N Smart Booking Architecture)
+A comprehensive **Postman Collection** is included in the root directory (`Doctorna_API_v2.postman_collection.json`). 
 
-For API endpoint testing, a comprehensive **Postman Collection V2** is included in the root directory.
+Import this file into Postman to instantly access all configured endpoints, complete with example request bodies, expected responses, and authentication workflows.
 
----
+### Standard Response Format
+Regardless of success or failure, the API will always respond with the following JSON signature:
 
-## 🏆 Core Contributors & Modules
-
-This project was built collaboratively. Each developer owned specific architectural layers and domain modules:
-
-- **👩‍💻 Rawan**
-  - **Core Integration:** Master Router implementation and overall API Architecture.
-  - **Authentication:** `POST` Login, `POST` Register, JWT Auto-login.
-  - **Documentation:** Phase 1-6 Documentation and Postman Collection V2.
-
-- **👨‍💻 Tayson (AhmedTyson)**
-  - **Authentication & Security:** Forget/Reset Password flow, PHPMailer Integration.
-  - **Doctor Module:** Full CRUD operations and Availability patching.
-  - **Performance:** Redis Caching ecosystem and invalidation strategy.
-
-- **👨‍💻 Abdullah & Adham**
-  - **Patients Module:** Admin-scoped endpoints and filtering.
-  - **Architecture:** Soft Delete pattern enforcement and Database schema.
-  - **Utilities:** Global Server-Side Pagination helper.
-
-- **👩‍💻 Maryam**
-  - **Appointments Module:** Full CRUD, Row-Level Security, and JWT User ID injection.
-  - **Search & Filtration:** Advanced dynamic searching logic and Operator Map generation.
-
-- **👩‍💻 Nada**
-  - **Sub Services Module:** Full CRUD and specific Hard-Delete enforcement.
-  - **Features:** Range-based price filtering and Redis caching integration.
-
-- **👩‍💻 Tassneem**
-  - **Speciality Module:** Full CRUD operations.
-  - **Features:** Advanced `LEFT JOIN` logic for doctor counts and Redis cache segregation.
+```json
+{
+    "status_code": 200,
+    "message": "Operation successful",
+    "data": { ... }
+}
+```
 
 ---
 
-## 🚑 Troubleshooting & FAQ
+## 🔒 Security Practices
 
-**Q: I get a "Class not found" error or 500 Server Error on startup.**
-**A:** Run `composer dump-autoload` to regenerate the PSR-4 autoloader maps. Also, ensure your `JWT_SECRET` is properly set in the `.env` file, as the system will fail loudly without it.
+- **Mass Assignment Prevention:** Input is strictly whitelisted before hitting the database.
+- **Row-Level Security:** Appointment and user data access is tightly scoped using the `user_id` decoded directly from the verified JWT, bypassing easily manipulated client-side IDs.
+- **Soft Deletion:** Records are preserved with a `deleted_at` timestamp rather than hard-deleted, maintaining referential database integrity.
+- **Rate Limiting Preparation:** The architecture supports Redis-based IP throttling for future horizontal scaling.
 
-**Q: Connection refused error for Redis.**
-**A:** Ensure your Redis server is actively running on port `6379`. On Windows, start the Redis service via WSL. On Mac/Linux, run `redis-server`.
+---
 
-**Q: Where are the `vendor/` files?**
-**A:** They are intentionally excluded from version control to keep the repository fast. Running `composer install` will download them locally.
+## 📝 License
+
+This project is open-source and available under the [MIT License](LICENSE).
