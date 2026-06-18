@@ -114,15 +114,4 @@ function handleUpdateAppointment($conn) {
     response(HttpStatus('OK'), "Appointment updated successfully", $updatedAppointment);
 }
 
-function getAllSpecialitiesController($conn) {
 
-
-    $result = paginateTable($conn, 'appointments', 10);
-
-    if (empty($result['list'])) {
-        response(HttpStatus('NOT_FOUND'), "No appointments found", $result);
-        return;
-    }
-
-    response(HttpStatus('OK'), "Appointment retrieved successfully", $result);
-}

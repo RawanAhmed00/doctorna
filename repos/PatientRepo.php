@@ -2,15 +2,14 @@
 
 require_once __DIR__ . '/../helper/db.php';
 require_once __DIR__ . '/../helper/filtration.php';
+require_once __DIR__ . '/../helper/pagination.php';
 
 function getAllPatients($conn) {
     // Only return users with role='user'. Hide soft-deleted.
     $sql = "SELECT id, name, email, age, gender, phone, role FROM users WHERE role = 'user' AND deleted_at IS NULL";
     
     $filtered = applyFilters($sql, ['gender', 'age', 'name'], [], ['name' => 'LIKE']);
-    $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
-    
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
 function getPatientById($conn, $id) {

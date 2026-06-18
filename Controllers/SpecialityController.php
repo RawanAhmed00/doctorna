@@ -50,7 +50,7 @@ function clearSpecialityCache($id = null) {
 
 function handleGetAllSpecialities($conn) {
     // Build dynamic, sorted cache key automatically
-    $cacheKey = generateFilteredCacheKey('specialities', ['name']);
+    $cacheKey = generateFilteredCacheKey('specialities', ['name', 'page', 'limit']);
 
     serveFromCacheIfAvailable($cacheKey, "Specialities fetched successfully");
 

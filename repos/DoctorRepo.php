@@ -7,9 +7,7 @@ function getAllDoctors($conn) {
     $sql = "SELECT * FROM doctors WHERE deleted_at IS NULL";
     
     $filtered = applyFilters($sql, ['gender', 'rank', 'is_available', 'name'], [], ['name' => 'LIKE']);
-    $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
-    
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
 function getDoctorById($conn, $id) {

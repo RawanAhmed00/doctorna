@@ -58,7 +58,7 @@ function handleGetAllDoctors($conn) {
     validateDoctorData($_GET);
 
     // Build dynamic, sorted cache key automatically
-    $cacheKey = generateFilteredCacheKey('doctors', ['gender', 'rank', 'is_available', 'name']);
+    $cacheKey = generateFilteredCacheKey('doctors', ['gender', 'rank', 'is_available', 'name', 'page', 'limit']);
 
     serveFromCacheIfAvailable($cacheKey, "Doctors fetched successfully");
 

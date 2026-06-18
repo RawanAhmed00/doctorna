@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../helper/db.php';
 require_once __DIR__ . '/../helper/filtration.php';
+require_once __DIR__ . '/../helper/pagination.php';
 
 function getAppointmentById($conn, $id) {
     $sql = "SELECT * FROM appointments WHERE id = :id";
@@ -14,8 +15,7 @@ function getAllAppointments($conn) {
     // Admin can filter by status, date_time, doc_id, user_id
     $filtered = applyFilters($baseSql, ['status', 'date_time', 'doc_id', 'user_id']);
     
-    $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
 function getAppointmentsByUserId($conn, $user_id) {
@@ -23,8 +23,7 @@ function getAppointmentsByUserId($conn, $user_id) {
     // User can filter their own appointments by status, date_time, doc_id
     $filtered = applyFilters($baseSql, ['status', 'date_time', 'doc_id'], ['user_id' => $user_id]);
     
-    $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
 function createAppointment($conn, $data) {

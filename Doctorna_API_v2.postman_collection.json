@@ -1,7 +1,7 @@
 {
     "info": {
         "name": "Doctorna API v2 (Minimal & Clean)",
-        "description": "# Doctorna API v2\n\nThis collection has been strictly optimized. All redundant endpoints have been removed. \n\n## 🔍 How Filtering Works\nOur API is smart. You do **not** need to hit separate \"filter\" endpoints or send custom headers.\n\nTo filter data, simply add query parameters to any `GET` request!\n\n**Examples:**\n- `GET /doctors` -> Returns all doctors.\n- `GET /doctors?gender=female&rank=specialist` -> Automatically returns filtered doctors.\n- `GET /specialities?name=Dentist` -> Returns specific specialities.\n- `GET /appointments?status=pending` -> Returns pending appointments.\n\n## 📊 Bonus Features (Query Flags)\n- `GET /specialities?id=1&include_doctors=1` -> Appends a `doctors_count` field to the speciality response.",
+        "description": "# Doctorna API v2\n\nThis collection has been strictly optimized. All redundant endpoints have been removed. \n\n## 🔍 How Filtering Works\nOur API is smart. You do **not** need to hit separate \"filter\" endpoints or send custom headers.\n\nTo filter data, simply add query parameters to any `GET` request!\n\n**Examples:**\n- `GET /doctors` -> Returns all doctors.\n- `GET /doctors?gender=female&rank=specialist` -> Automatically returns filtered doctors.\n- `GET /specialities?name=Dentist` -> Returns specific specialities.\n- `GET /appointments?status=pending` -> Returns pending appointments.\n\n## 📊 Bonus Features (Query Flags)\n- `GET /specialities?id=1&include_doctors=1` -> Appends a `doctors_count` field to the speciality response.\n\n## 📄 Global Pagination\nAll GET All endpoints now support global server-side pagination via ?page=1&limit=10. The response includes list and pagination metadata (\total_records, has_next, etc.).",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -154,6 +154,18 @@
                                     "value": "1",
                                     "disabled": true,
                                     "description": "Optional: 0 or 1"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "disabled": false,
+                                    "description": "Pagination: Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "disabled": false,
+                                    "description": "Pagination: Items per page"
                                 }
                             ]
                         },
@@ -341,6 +353,18 @@
                                     "value": "1",
                                     "disabled": true,
                                     "description": "Optional: Filter by Doctor ID"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "disabled": false,
+                                    "description": "Pagination: Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "disabled": false,
+                                    "description": "Pagination: Items per page"
                                 }
                             ]
                         },
@@ -499,6 +523,18 @@
                                     "value": "25",
                                     "disabled": true,
                                     "description": "Optional: Filter by exact age"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "disabled": false,
+                                    "description": "Pagination: Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "disabled": false,
+                                    "description": "Pagination: Items per page"
                                 }
                             ]
                         }
@@ -653,6 +689,18 @@
                                     "value": "25",
                                     "disabled": true,
                                     "description": "Optional: Filter by exact age"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "disabled": false,
+                                    "description": "Pagination: Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "disabled": false,
+                                    "description": "Pagination: Items per page"
                                 }
                             ]
                         }
@@ -797,6 +845,18 @@
                                     "value": "150",
                                     "disabled": true,
                                     "description": "Optional filter by fee amount"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "disabled": false,
+                                    "description": "Pagination: Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "disabled": false,
+                                    "description": "Pagination: Items per page"
                                 }
                             ]
                         }

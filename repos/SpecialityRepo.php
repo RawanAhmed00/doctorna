@@ -2,13 +2,13 @@
 
 require_once __DIR__ . '/../helper/db.php';
 require_once __DIR__ . '/../helper/filtration.php';
+require_once __DIR__ . '/../helper/pagination.php';
 
 function getAllSpecialities($conn) {
     $sql = "SELECT * FROM speciality WHERE deleted_at IS NULL";
     // Allow filtering by name via LIKE
     $filtered = applyFilters($sql, ['name'], [], ['name' => 'LIKE']);
-    $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return paginateQuery($conn, $filtered['sql'], $filtered['bindings']);
 }
 
 function getSpecialityById($conn, $id, $includeDoctorsCount = false) {
