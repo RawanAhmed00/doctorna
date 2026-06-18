@@ -7,8 +7,7 @@ function getAllPatients($conn) {
     // Only return users with role='user'. Hide soft-deleted.
     $sql = "SELECT id, name, email, age, gender, phone, role FROM users WHERE role = 'user' AND deleted_at IS NULL";
     
-    // Dynamic filtering for Admin (e.g. ?gender=male)
-    $filtered = applyFilters($sql, ['gender', 'age']);
+    $filtered = applyFilters($sql, ['gender', 'age', 'name'], [], ['name' => 'LIKE']);
     $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
     
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

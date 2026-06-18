@@ -48,7 +48,7 @@ function handleGetAllPatients($conn) {
     validatePatientData($_GET);
 
     // Build dynamic, sorted cache key automatically
-    $cacheKey = generateFilteredCacheKey('patients', ['gender', 'age']);
+    $cacheKey = generateFilteredCacheKey('patients', ['gender', 'age', 'name']);
 
     serveFromCacheIfAvailable($cacheKey, "Patients fetched successfully");
 

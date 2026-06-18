@@ -6,8 +6,7 @@ require_once __DIR__ . '/../helper/filtration.php';
 function getAllDoctors($conn) {
     $sql = "SELECT * FROM doctors WHERE deleted_at IS NULL";
     
-    // applyFilters safely ignores if GET params are missing
-    $filtered = applyFilters($sql, ['gender', 'rank', 'is_available']);
+    $filtered = applyFilters($sql, ['gender', 'rank', 'is_available', 'name'], [], ['name' => 'LIKE']);
     $stmt = runQuery($conn, $filtered['sql'], $filtered['bindings']);
     
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

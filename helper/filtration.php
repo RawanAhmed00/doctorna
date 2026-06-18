@@ -1,22 +1,35 @@
 <?php
 
-function applyFilters(string $baseQuery, array $allowedFields, array $bindings = []): array {
+function applyFilters(string $baseQuery, array $allowedFields, array $bindings = [], array $operatorMap = []): array {
     $query = $baseQuery;
     
     foreach ($allowedFields as $field) {
-        // If query param exists and isn't empty
         if (isset($_GET[$field]) && $_GET[$field] !== '') {
-            // Strip any table aliases (like 'd.status') to make a clean PDO parameter name
             $paramName = str_replace('.', '_', $field);
+            $value = $_GET[$field];
             
-            // If the field is a date/time column but only a date (YYYY-MM-DD) is provided, match the whole day
-            if (strpos($field, 'date') !== false && strlen($_GET[$field]) === 10) {
-                $query .= " AND DATE($field) = :$paramName";
-            } else {
-                $query .= " AND $field = :$paramName";
+            // Determine operator and column from operatorMap
+            $operator = '=';
+            $column = $field;
+            if (isset($operatorMap[$field])) {
+                if (is_array($operatorMap[$field])) {
+                    $operator = $operatorMap[$field][0];
+                    $column = $operatorMap[$field][1];
+                } else {
+                    $operator = $operatorMap[$field];
+                }
             }
             
-            $bindings[":$paramName"] = $_GET[$field];
+            if ($operator === '=' && strpos($column, 'date') !== false && strlen($value) === 10) {
+                $query .= " AND DATE($column) = :$paramName";
+            } elseif (strtoupper($operator) === 'LIKE') {
+                $query .= " AND $column LIKE :$paramName";
+                $value = '%' . $value . '%';
+            } else {
+                $query .= " AND $column $operator :$paramName";
+            }
+            
+            $bindings[":$paramName"] = $value;
         }
     }
     
